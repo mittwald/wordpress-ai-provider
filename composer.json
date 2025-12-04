@@ -1,0 +1,15 @@
+{
+  "name": "mittwald/wordpress-ai-provider",
+  "description": "Adds mittwald AI hosting to the available AI providers",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/mittwald/wordpress-ai-provider",
+  "autoload": {
+    "psr-4": {
+      "Mittwald\\AiProvider\\": "includes/"
+    }
+  },
+  "require": {
+    "php": ">=7.4"
+  }
+}
