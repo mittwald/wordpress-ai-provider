@@ -1,4 +1,4 @@
-# mittwald AI Provider for Drupal
+# mittwald AI Provider for WordPress
 
 > [!WARNING]
 > This plugin is experimental and currently not working out of the box.
