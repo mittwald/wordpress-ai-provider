@@ -9,7 +9,7 @@
  * Author URI: https://www.mittwald.de/blog/autoren/lukas-fritze
  * License: GPL-2.0-or-later
  * Requires Plugins: ai/ai.php
-*/
+ */
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
@@ -59,10 +59,7 @@ function add_action_links( $links ) {
     return $links;
 }
 
-add_action('plugins_loaded', 'init');
-
-function init(): void {
-
+add_action('wp_loaded', function () {
     $dep_autoload = WP_PLUGIN_DIR . '/ai/vendor/autoload.php';
     if ( file_exists( $dep_autoload ) && ! class_exists( '\WordPress\AiClient\AiClient', false ) ) {
         require_once $dep_autoload;
@@ -73,8 +70,8 @@ function init(): void {
         require_once $my_autoload;
     }
 
-    add_action('initialize_ai_credentials_manager', function () {
-        $registry = \WordPress\AiClient\AiClient::defaultRegistry();
-        $registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class);
-    });
-}
+    $registry = \WordPress\AiClient\AiClient::defaultRegistry();
+    $registry->registerProvider(\Mittwald\AiProvider\MittwaldAIProvider::class);
+
+    (new \WordPress\AI_Client\API_Credentials\API_Credentials_Manager())->initialize();
+});

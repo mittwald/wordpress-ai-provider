@@ -1,7 +1,7 @@
 # mittwald AI Provider for WordPress
 
 > [!WARNING]
-> This plugin is experimental and currently not working out of the box.
+> This plugin is experimental and not (yet) recommended for production usage.
 
 A WordPress plugin that integrates
 [mittwald AI Hosting](https://developer.mittwald.de/docs/v2/platform/aihosting/) 
@@ -20,7 +20,6 @@ to leverage mittwald's AI hosting platform for various AI Experiments.
 ## Requirements
 - WordPress 6.8 or higher
 - [WordPress AI Experiments Plugin](https://github.com/WordPress/ai)
-- EXPERIMENTAL: custom patch in the WordPress AI Experiments Plugin 
 - A [mittwald AI Hosting](https://www.mittwald.de/mstudio/ai-hosting) account with API access
 
 ## Installation
@@ -38,20 +37,12 @@ Install this plugin:
   * Choose the downloaded ZIP file and click "Install Now".
 * Activate the Plugin
  
-### Patch AI Experiments plugin
+### AI Experiments plugin
 
-Currently the WordPress AI Experiments plugin does not support registration 
-of custom AI providers. This is [planned for a next release](https://make.wordpress.org/ai/2025/11/27/announcing-the-ai-experiments-plugin-v0-1-0/).
-
-Since this feature is not supported yet, we need to add a custom patch to 
-one of the plugin files. This is **HIGHLY EXPERIMENTAL and expected to 
-break** with every update!  
-
-* Open the file `.../wordpress-root/wp-content/plugins/ai/vendor/wordpress/wp-ai-client/includes/AI_Client.php`.
-* After Line 54 (`WP_AI_Client_Discovery_Strategy::init();`) add
-  ```php
-  do_action( 'initialize_ai_credentials_manager' );
-  ```
+Currently, the WordPress AI Experiments plugin does not officially support 
+registration of custom AI providers. This is [planned for a next release](https://make.wordpress.org/ai/2025/11/27/announcing-the-ai-experiments-plugin-v0-1-0/).
+Therefore, the current way the provider is registered could break with an 
+upcoming WordPress release. 
 
 ## Configuration
 1. **Obtain an API Key**: Follow the [mittwald AI Hosting access guide](https://developer.mittwald.de/docs/v2/platform/aihosting/access-and-usage/access/) to get your API credentials.
@@ -90,9 +81,9 @@ Not currently supported by mittwald AI Hosting.
 
 Not currently supported by mittwald AI Hosting.
 
-### Speech to Text ⏸️
+### Speech to Text / Audio Transcription ⏸️
 
-Not currently supported by mittwald AI Hosting.
+Not currently implemented.
 
 ### Moderation ⏸️
 
