@@ -110,6 +110,7 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 							$modelOptions = $gptOptions;
 							break;
 						case 'Mistral-Small-3.2-24B-Instruct':
+						case 'Ministral-3-14B-Instruct-2512':
 							$modelCaps = $gptCapabilities;
 							$modelOptions = $gptMultimodalInputOptions;
 							break;
