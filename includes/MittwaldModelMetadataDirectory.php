@@ -23,7 +23,7 @@ use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCo
  * @since 0.1.0
  *
  * @phpstan-type ModelsResponseData array{
- *     data: list<array{id: string}>
+ *     data?: list<array{id: string}>
  * }
  */
 class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetadataDirectory {
