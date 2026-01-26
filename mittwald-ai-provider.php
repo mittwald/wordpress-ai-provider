@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Display an admin notice if the dependency is missing.
  */
-add_filter('plugin_action_links_'. plugin_basename(__FILE__),  function ( $links ) {
+add_filter('plugin_action_links_'. plugin_basename(__FILE__),  function ( array $links ): array {
     $settings_link = sprintf(
             '<a href="%1$s">%2$s</a>',
             admin_url( 'options-general.php?page=wp-ai-client' ),
