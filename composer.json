@@ -11,5 +11,17 @@
   },
   "require": {
     "php": ">=7.4"
+  },
+  "require-dev": {
+    "wordpress/wp-ai-client": "~0.2.1",
+    "phpstan/phpstan": "^2.1.37",
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "phpstan/extension-installer": "^1.4"
+  },
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": true,
+      "phpstan/extension-installer": true
+    }
   }
 }

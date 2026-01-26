@@ -20,7 +20,7 @@ class MittwaldImageGenerationModel extends AbstractOpenAiCompatibleImageGenerati
 	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = [], $data = null ): Request {
 		return new Request(
 			$method,
-			OpenAiProvider::url( $path ),
+			MittwaldAiProvider::url( $path ),
 			$headers,
 			$data,
 			$this->getRequestOptions()
