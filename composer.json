@@ -18,6 +18,9 @@
     "szepeviktor/phpstan-wordpress": "^2.0",
     "phpstan/extension-installer": "^1.4"
   },
+  "scripts": {
+    "analyse": "phpstan analyse --memory-limit=512M"
+  },
   "config": {
     "allow-plugins": {
       "php-http/discovery": true,
