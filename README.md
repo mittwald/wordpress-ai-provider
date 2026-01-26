@@ -58,11 +58,13 @@ upcoming WordPress release.
 
 ### Chat Completions ✅
 Fully supported for conversational AI, content generation, and chat-based interactions.
+
 **Available Models:**
 - **GPT-OSS models**: Open-source GPT-compatible models
-- **Mistral Small**: `mistral-small-*` (supports vision/image input)
-- **Qwen3 Coder**: `qwen3-coder-*` - optimized for code generation
-  **Capabilities:**
+- **Ministral**: supports vision/image input
+- **Devstral**: optimized for code generation
+
+- **Capabilities:**
 - Standard text chat
 - Image vision (Mistral Small models only)
 - JSON output formatting

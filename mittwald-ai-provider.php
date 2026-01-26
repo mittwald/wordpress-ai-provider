@@ -4,9 +4,9 @@
  * Plugin Name: mittwald AI Provider
  * Plugin URI: https://github.com/mittwald/wordpress-ai-provider
  * Description: Adds mittwald AI hosting to the available AI providers
- * Version: 1.0
- * Author: Lukas Fritze
- * Author URI: https://www.mittwald.de/blog/autoren/lukas-fritze
+ * Version: 0.1
+ * Author: mittwald, Lukas Fritze, Martin Helmich
+ * Author URI: https://www.mittwald.de/
  * License: GPL-2.0-or-later
  * Requires Plugins: ai/ai.php
  */
