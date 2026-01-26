@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace Mittwald\AiProvider;
 
@@ -13,39 +13,36 @@ use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCo
  *
  * @since 0.1.0
  */
-class MittwaldImageGenerationModel extends AbstractOpenAiCompatibleImageGenerationModel
-{
-    /**
-     * @inheritDoc
-     */
-    protected function createRequest(HttpMethodEnum $method, string $path, array $headers = [], $data = null): Request
-    {
-        return new Request(
-            $method,
-            OpenAiProvider::url($path),
-            $headers,
-            $data,
-            $this->getRequestOptions()
-        );
-    }
+class MittwaldImageGenerationModel extends AbstractOpenAiCompatibleImageGenerationModel {
+	/**
+	 * @inheritDoc
+	 */
+	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = [], $data = null ): Request {
+		return new Request(
+			$method,
+			OpenAiProvider::url( $path ),
+			$headers,
+			$data,
+			$this->getRequestOptions()
+		);
+	}
 
-    /**
-     * @inheritDoc
-     */
-    protected function prepareGenerateImageParams(array $prompt): array
-    {
-        $params = parent::prepareGenerateImageParams($prompt);
+	/**
+	 * @inheritDoc
+	 */
+	protected function prepareGenerateImageParams( array $prompt ): array {
+		$params = parent::prepareGenerateImageParams( $prompt );
 
-        /*
-         * Only the newer 'gpt-image-' models support passing a MIME type ('output_format').
-         * Conversely, they do not support 'response_format', but always return a base64 encoded image.
-         */
-        if (isset($params['model']) && is_string($params['model']) && str_starts_with($params['model'], 'gpt-image-')) {
-            unset($params['response_format']);
-        } else {
-            unset($params['output_format']);
-        }
+		/*
+		 * Only the newer 'gpt-image-' models support passing a MIME type ('output_format').
+		 * Conversely, they do not support 'response_format', but always return a base64 encoded image.
+		 */
+		if ( isset( $params['model'] ) && is_string( $params['model'] ) && str_starts_with( $params['model'], 'gpt-image-' ) ) {
+			unset( $params['response_format'] );
+		} else {
+			unset( $params['output_format'] );
+		}
 
-        return $params;
-    }
+		return $params;
+	}
 }

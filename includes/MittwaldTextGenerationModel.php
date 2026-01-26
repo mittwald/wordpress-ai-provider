@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace Mittwald\AiProvider;
 
@@ -13,21 +13,19 @@ use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCo
  *
  * @since 0.1.0
  */
-class MittwaldTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationModel
-{
-    /**
-     * {@inheritDoc}
-     *
-     * @since 0.1.0
-     */
-    protected function createRequest(HttpMethodEnum $method, string $path, array $headers = [], $data = null): Request
-    {
-        return new Request(
-            $method,
-	        MittwaldAIProvider::url($path),
-            $headers,
-            $data,
-            $this->getRequestOptions()
-        );
-    }
+class MittwaldTextGenerationModel extends AbstractOpenAiCompatibleTextGenerationModel {
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @since 0.1.0
+	 */
+	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = [], $data = null ): Request {
+		return new Request(
+			$method,
+			MittwaldAIProvider::url( $path ),
+			$headers,
+			$data,
+			$this->getRequestOptions()
+		);
+	}
 }

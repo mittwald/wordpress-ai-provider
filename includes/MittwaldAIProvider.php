@@ -50,7 +50,7 @@ class MittwaldAIProvider extends AbstractApiProvider {
 		}
 
 		throw new RuntimeException(
-			'Unsupported model capabilities: ' . implode( ', ', $capabilities )
+			'Unsupported model capabilities: ' . esc_html( implode( ', ', $capabilities ) )
 		);
 	}
 
