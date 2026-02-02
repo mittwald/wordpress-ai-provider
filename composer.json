@@ -21,7 +21,9 @@
     "phpcompatibility/phpcompatibility-wp": "^2.1"
   },
   "scripts": {
-    "analyse": "phpstan analyse --memory-limit=512M"
+    "analyse": "phpstan analyse --memory-limit=512M",
+    "format": "phpcs",
+    "format:fix": "phpcbf"
   },
   "config": {
     "allow-plugins": {

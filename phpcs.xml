@@ -4,6 +4,7 @@
 
     <!-- Scan these files -->
     <file>includes</file>
+    <file>mittwald-ai-provider.php</file>
     <!--<file>tests</file>-->
 
     <!-- Ignore vendor directory -->
@@ -77,6 +78,7 @@
     <rule ref="Squiz.Commenting.FileComment">
         <!-- File comments "just because" are stupid; do not enforce them -->
         <exclude name="Squiz.Commenting.FileComment.Missing"/>
+        <exclude name="Squiz.Commenting.FileComment.MissingPackageTag"/>
     </rule>
 
 </ruleset>
