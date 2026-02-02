@@ -11,5 +11,12 @@
   },
   "require": {
     "php": ">=7.4"
+  },
+  "scripts": {
+    "package": [
+      "rm -f mittwald-ai-provider.zip",
+      "composer install --no-dev --optimize-autoloader",
+      "zip -r mittwald-ai-provider.zip . -x '*.git*' -x 'README.md' -x '.idea/*'"
+    ]
   }
 }

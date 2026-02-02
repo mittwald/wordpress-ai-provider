@@ -1,1 +1,8 @@
-.idea/
+# exclude IDE specific files
+/.idea/
+
+# exclude composer vendor directory
+/vendor/
+
+# exclude built zip distributions
+/*.zip
