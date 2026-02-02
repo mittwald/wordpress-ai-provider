@@ -47,7 +47,7 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 	 * @throws ResponseException
 	 */
 	protected function parseResponseToModelMetadataList( Response $response ): array {
-		/** @var ModelsResponseData $responseData */
+		/** @var ModelsResponseData $responseData *///phpcs:ignore
 		$responseData = $response->getData();
 		if ( ! isset( $responseData['data'] ) || ! $responseData['data'] ) {
 			throw ResponseException::fromMissingData( 'OpenAI', 'data' );
@@ -201,10 +201,10 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 
 			// Prefer '-mini' models over others with a suffix.
 			if ( isset( $aMatches[2] ) && isset( $bMatches[2] ) ) {
-				if ( $aMatches[2] === '-mini' && $bMatches[2] !== '-mini' ) {
+				if ( '-mini' === $aMatches[2] && '-mini' !== $bMatches[2] ) {
 					return - 1;
 				}
-				if ( $bMatches[2] === '-mini' && $aMatches[2] !== '-mini' ) {
+				if ( '-mini' === $bMatches[2] && '-mini' !== $aMatches[2] ) {
 					return 1;
 				}
 			}

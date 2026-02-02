@@ -16,7 +16,7 @@ use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCo
  */
 class MittwaldImageGenerationModel extends AbstractOpenAiCompatibleImageGenerationModel {
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = array(), $data = null ): Request {
 		return new Request(
@@ -29,7 +29,7 @@ class MittwaldImageGenerationModel extends AbstractOpenAiCompatibleImageGenerati
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	protected function prepareGenerateImageParams( array $prompt ): array {
 		$params = parent::prepareGenerateImageParams( $prompt );

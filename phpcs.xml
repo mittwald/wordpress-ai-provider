@@ -81,4 +81,10 @@
         <exclude name="Squiz.Commenting.FileComment.MissingPackageTag"/>
     </rule>
 
+    <rule ref="WordPress.NamingConventions.ValidVariableName">
+        <!-- Allow camelCase variable names, as these are also used in the PHP AI Client SDK
+             which we're inheriting from. -->
+        <exclude name="WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase" />
+    </rule>
+
 </ruleset>
