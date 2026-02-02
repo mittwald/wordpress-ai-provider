@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Mittwald\AiProvider;
 
+use Override;
 use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCompatibleImageGenerationModel;
@@ -17,7 +18,7 @@ class MittwaldImageGenerationModel extends AbstractOpenAiCompatibleImageGenerati
 	/**
 	 * @inheritDoc
 	 */
-	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = [], $data = null ): Request {
+	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = array(), $data = null ): Request {
 		return new Request(
 			$method,
 			MittwaldAIProvider::url( $path ),

@@ -30,9 +30,9 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since 0.1.0
+	 * @throws \InvalidArgumentException
 	 */
-	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = [], $data = null ): Request {
+	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = array(), $data = null ): Request {
 		return new Request(
 			$method,
 			MittwaldAIProvider::url( $path ),
@@ -44,7 +44,7 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since 0.1.0
+	 * @throws ResponseException
 	 */
 	protected function parseResponseToModelMetadataList( Response $response ): array {
 		/** @var ModelsResponseData $responseData */
@@ -54,11 +54,11 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 		}
 
 		// Unfortunately, the OpenAI API does not return model capabilities, so we have to hardcode them here.
-		$gptCapabilities           = [
+		$gptCapabilities           = array(
 			CapabilityEnum::textGeneration(),
 			CapabilityEnum::chatHistory(),
-		];
-		$gptBaseOptions            = [
+		);
+		$gptBaseOptions            = array(
 			new SupportedOption( OptionEnum::systemInstruction() ),
 			new SupportedOption( OptionEnum::candidateCount() ),
 			new SupportedOption( OptionEnum::maxTokens() ),
@@ -69,25 +69,31 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 			new SupportedOption( OptionEnum::frequencyPenalty() ),
 			new SupportedOption( OptionEnum::logprobs() ),
 			new SupportedOption( OptionEnum::topLogprobs() ),
-			new SupportedOption( OptionEnum::outputMimeType(), [ 'text/plain', 'application/json' ] ),
+			new SupportedOption( OptionEnum::outputMimeType(), array( 'text/plain', 'application/json' ) ),
 			new SupportedOption( OptionEnum::outputSchema() ),
 			new SupportedOption( OptionEnum::functionDeclarations() ),
 			new SupportedOption( OptionEnum::customOptions() ),
-		];
-		$gptOptions                = array_merge( $gptBaseOptions, [
-			new SupportedOption( OptionEnum::inputModalities(), [ [ ModalityEnum::text() ] ] ),
-			new SupportedOption( OptionEnum::outputModalities(), [ [ ModalityEnum::text() ] ] ),
-		] );
-		$gptMultimodalInputOptions = array_merge( $gptBaseOptions, [
-			new SupportedOption(
-				OptionEnum::inputModalities(),
-				[
-					[ ModalityEnum::text() ],
-					[ ModalityEnum::text(), ModalityEnum::image() ],
-				]
-			),
-			new SupportedOption( OptionEnum::outputModalities(), [ [ ModalityEnum::text() ] ] ),
-		] );
+		);
+		$gptOptions                = array_merge(
+			$gptBaseOptions,
+			array(
+				new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
+				new SupportedOption( OptionEnum::outputModalities(), array( array( ModalityEnum::text() ) ) ),
+			)
+		);
+		$gptMultimodalInputOptions = array_merge(
+			$gptBaseOptions,
+			array(
+				new SupportedOption(
+					OptionEnum::inputModalities(),
+					array(
+						array( ModalityEnum::text() ),
+						array( ModalityEnum::text(), ModalityEnum::image() ),
+					)
+				),
+				new SupportedOption( OptionEnum::outputModalities(), array( array( ModalityEnum::text() ) ) ),
+			)
+		);
 
 		$modelsData = (array) $responseData['data'];
 
@@ -112,8 +118,8 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 							$modelOptions = $gptMultimodalInputOptions;
 							break;
 						default:
-							$modelCaps    = [];
-							$modelOptions = [];
+							$modelCaps    = array();
+							$modelOptions = array();
 					}
 
 					return new ModelMetadata(
@@ -127,7 +133,7 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 			)
 		);
 
-		usort( $models, [ $this, 'modelSortCallback' ] );
+		usort( $models, array( $this, 'modelSortCallback' ) );
 
 		return $models;
 	}
@@ -144,7 +150,6 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 	 *
 	 * @return int Comparison result.
 	 * @since 0.2.1
-	 *
 	 */
 	protected function modelSortCallback( ModelMetadata $a, ModelMetadata $b ): int {
 		$aId = $a->getId();

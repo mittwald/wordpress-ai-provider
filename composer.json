@@ -16,7 +16,9 @@
     "wordpress/wp-ai-client": "~0.2.1",
     "phpstan/phpstan": "^2.1.37",
     "szepeviktor/phpstan-wordpress": "^2.0",
-    "phpstan/extension-installer": "^1.4"
+    "phpstan/extension-installer": "^1.4",
+    "wp-coding-standards/wpcs": "^3.0",
+    "phpcompatibility/phpcompatibility-wp": "^2.1"
   },
   "scripts": {
     "analyse": "phpstan analyse --memory-limit=512M"
@@ -24,7 +26,8 @@
   "config": {
     "allow-plugins": {
       "php-http/discovery": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
   }
 }

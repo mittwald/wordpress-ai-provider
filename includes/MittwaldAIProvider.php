@@ -20,8 +20,6 @@ use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 class MittwaldAIProvider extends AbstractApiProvider {
 	/**
 	 * {@inheritDoc}
-	 *
-	 * @since 0.2.0
 	 */
 	protected static function baseUrl(): string {
 		return 'https://llm.aihosting.mittwald.de/v1';
@@ -30,7 +28,7 @@ class MittwaldAIProvider extends AbstractApiProvider {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @since 0.1.0
+	 * @throws RuntimeException
 	 */
 	protected static function createModel(
 		ModelMetadata $modelMetadata,
