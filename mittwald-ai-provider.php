@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * the required plugin installed and activated. However, in case that does happen,
  * this notice will inform the user about the issue.
  */
-function display_missing_ai_plugin_notice() {
+function display_missing_ai_plugin_notice(): void {
 	?>
 	<div class="notice notice-error">
 		<p><?php esc_html_e( 'The mittwald AI provider plugin requires the WordPress AI Client plugin to be installed and activated.', 'mittwald-ai-provider' ); ?></p>
