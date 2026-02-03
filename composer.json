@@ -23,7 +23,12 @@
   "scripts": {
     "analyse": "phpstan analyse --memory-limit=512M",
     "format": "phpcs",
-    "format:fix": "phpcbf"
+    "format:fix": "phpcbf",
+    "package": [
+      "rm -f mittwald-ai-provider.zip",
+      "composer install --no-dev --optimize-autoloader",
+      "zip -r mittwald-ai-provider.zip . -x '*.git*' -x '*.md' -x '.idea/*' -x '.claude/*'"
+    ]
   },
   "config": {
     "allow-plugins": {

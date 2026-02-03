@@ -29,8 +29,7 @@ installed. If not, install and activate it.
 
 Install this plugin:
 
-* Download the files: Click "Code" → "Download ZIP" (or clone the repository 
-  using Git).
+* Download this plugin from the WordPress plugin directory as a ZIP file
 * Upload to WordPress
   * Navigate to "Plugins" → "Add New" (`/wp-admin/plugin-install.php`) 
     and click "Upload Plugin".
@@ -117,6 +116,14 @@ Contributions are welcome! Areas where help is especially appreciated:
 - Adding tests
 - Documentation improvements
 - Bug fixes and performance improvements
+
+To build an installable development version from source, run the `package` composer script:
+
+```bash
+$ composer run package
+```
+
+This command will create a ZIP file in the project directory that can be uploaded to a WordPress installation.
 
 ## License
 

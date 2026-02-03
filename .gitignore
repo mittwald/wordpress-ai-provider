@@ -1,3 +1,9 @@
-.idea/
-vendor/
-composer.lock
+# exclude IDE specific files
+/.idea/
+
+# exclude package manager files
+/vendor/
+/composer.lock
+
+# exclude built zip distributions
+/*.zip
