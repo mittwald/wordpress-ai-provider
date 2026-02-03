@@ -27,7 +27,7 @@
     "package": [
       "rm -f mittwald-ai-provider.zip",
       "composer install --no-dev --optimize-autoloader",
-      "zip -r mittwald-ai-provider.zip . -x '*.git*' -x '*.md' -x '.idea/*' -x '.claude/*'"
+      "zip -r mittwald-ai-provider.zip . -x '*.git*' -x '*.md' -x '.idea/*' -x '.claude/*' -x phpcs.xml -x phpstan.neon"
     ]
   },
   "config": {
