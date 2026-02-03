@@ -15,12 +15,12 @@ use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCo
  */
 class MittwaldImageGenerationModel extends AbstractOpenAiCompatibleImageGenerationModel {
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
-	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = [], $data = null ): Request {
+	protected function createRequest( HttpMethodEnum $method, string $path, array $headers = array(), $data = null ): Request {
 		return new Request(
 			$method,
-			OpenAiProvider::url( $path ),
+			MittwaldAIProvider::url( $path ),
 			$headers,
 			$data,
 			$this->getRequestOptions()
@@ -28,7 +28,7 @@ class MittwaldImageGenerationModel extends AbstractOpenAiCompatibleImageGenerati
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	protected function prepareGenerateImageParams( array $prompt ): array {
 		$params = parent::prepareGenerateImageParams( $prompt );
