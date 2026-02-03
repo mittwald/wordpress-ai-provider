@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name: mittwald AI provider
  * Plugin URI: https://github.com/mittwald/wordpress-ai-provider
@@ -15,7 +14,7 @@ namespace Mittwald\AiProvider;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 /**
@@ -27,11 +26,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * this notice will inform the user about the issue.
  */
 function display_missing_ai_plugin_notice() {
-    ?>
-    <div class="notice notice-error">
-        <p><?php esc_html_e( 'The mittwald AI provider plugin requires the WordPress AI Client plugin to be installed and activated.', 'mittwald-ai-provider' ); ?></p>
-    </div>
-    <?php
+	?>
+	<div class="notice notice-error">
+		<p><?php esc_html_e( 'The mittwald AI provider plugin requires the WordPress AI Client plugin to be installed and activated.', 'mittwald-ai-provider' ); ?></p>
+	</div>
+	<?php
 }
 
 /**
@@ -43,19 +42,19 @@ function display_missing_ai_plugin_notice() {
  * will inform them about the issue.
  */
 function display_composer_notice(): void {
-    ?>
-    <div class="notice notice-error">
-        <p>
-            <?php
-            printf(
-            /* translators: %s: composer install command */
-                esc_html__( 'Your installation of the mittwald AI provider plugin is incomplete. Please run %s.', 'mittwald-ai-provider' ),
-                '<code>composer install</code>'
-            );
-            ?>
-        </p>
-    </div>
-    <?php
+	?>
+	<div class="notice notice-error">
+		<p>
+			<?php
+			printf(
+			/* translators: %s: composer install command */
+				esc_html__( 'Your installation of the mittwald AI provider plugin is incomplete. Please run %s.', 'mittwald-ai-provider' ),
+				'<code>composer install</code>'
+			);
+			?>
+		</p>
+	</div>
+	<?php
 }
 
 /**
@@ -64,43 +63,54 @@ function display_composer_notice(): void {
  * NOTE: This plugin does not actually have its own settings page; instead,
  * we piggyback on the settings page of the main `ai` plugin.
  */
-add_filter('plugin_action_links_'. plugin_basename(__FILE__),  function ( $links ) {
-    $settings_link = sprintf(
-            '<a href="%1$s">%2$s</a>',
-            admin_url( 'options-general.php?page=wp-ai-client' ),
-            // use translation from required plugin `ai`
-            esc_html__( 'Settings', 'ai' )
-    );
+add_filter(
+	'plugin_action_links_' . plugin_basename( __FILE__ ),
+	function ( array $links ): array {
+		$settings_link = sprintf(
+			'<a href="%1$s">%2$s</a>',
+			admin_url( 'options-general.php?page=wp-ai-client' ),
+			// use translation from required plugin `ai`.
+			// phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+			esc_html__( 'Settings', 'ai' )
+		);
 
-    array_unshift( $links, $settings_link );
+		array_unshift( $links, $settings_link );
 
-    return $links;
-});
+		return $links;
+	}
+);
 
-add_action('plugins_loaded', function () {
-    // Note: We assume that the Composer autoloader of the "ai" plugin is already loaded,
-    // because that plugin does so in the `plugins_loaded` action with default priority (10).
-    // We use priority 20 to ensure our code runs *after* that.
-    //
-    // For this reason, there is no realistic way for this check to fail; this is just us
-    // being defensive.
-    if (!class_exists(\WordPress\AiClient\AiClient::class)) {
-        add_action('admin_notices', __NAMESPACE__ . '\\display_missing_ai_plugin_notice');
-        return;
-    }
+add_action(
+	'plugins_loaded',
+	function () {
+		// Note: We assume that the Composer autoloader of the "ai" plugin is already loaded,
+		// because that plugin does so in the `plugins_loaded` action with default priority (10).
+		// We use priority 20 to ensure our code runs *after* that.
+		//
+		// For this reason, there is no realistic way for this check to fail; this is just us
+		// being defensive.
+		if ( ! class_exists( \WordPress\AiClient\AiClient::class ) ) {
+			add_action( 'admin_notices', __NAMESPACE__ . '\\display_missing_ai_plugin_notice' );
+			return;
+		}
 
-    $my_autoload = __DIR__ . '/vendor/autoload.php';
-    if (!file_exists($my_autoload)) {
-        add_action('admin_notices', __NAMESPACE__ . '\\display_composer_notice');
-        return;
-    }
+		$my_autoload = __DIR__ . '/vendor/autoload.php';
+		if ( ! file_exists( $my_autoload ) ) {
+			add_action( 'admin_notices', __NAMESPACE__ . '\\display_composer_notice' );
+			return;
+		}
 
-    require_once $my_autoload;
-}, 20);
+		require_once $my_autoload;
+	},
+	20
+);
 
-add_action('wp_loaded', function () {
-    $registry = \WordPress\AiClient\AiClient::defaultRegistry();
-    $registry->registerProvider(\Mittwald\AiProvider\MittwaldAIProvider::class);
+add_action(
+	'wp_loaded',
+	function () {
+		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
+		$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
 
-    (new \WordPress\AI_Client\API_Credentials\API_Credentials_Manager())->initialize();
-});
+		( new \WordPress\AI_Client\API_Credentials\API_Credentials_Manager() )->initialize();
+	}
+);

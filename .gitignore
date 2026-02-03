@@ -1,8 +1,9 @@
 # exclude IDE specific files
 /.idea/
 
-# exclude composer vendor directory
+# exclude package manager files
 /vendor/
+/composer.lock
 
 # exclude built zip distributions
 /*.zip
