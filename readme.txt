@@ -63,3 +63,6 @@ To obtain an API Key follow the [mittwald AI Hosting access guide](https://devel
 
 mittwald AI Hosting has usage limits based on your account tier. For details on usage limits and terms, see the [mittwald AI Hosting terms of use](https://developer.mittwald.de/docs/v2/platform/aihosting/access-and-usage/terms-of-use/).
 
+== Screenshots ==
+
+1. AI Credentials settings page where you can enter your mittwald AI Hosting API key.
