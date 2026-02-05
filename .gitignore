@@ -3,7 +3,6 @@
 
 # exclude package manager files
 /vendor/
-/composer.lock
 
 # exclude built zip distributions
 /*.zip
