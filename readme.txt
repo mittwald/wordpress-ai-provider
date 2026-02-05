@@ -12,7 +12,7 @@ Connects WordPress AI Experiments to mittwald AI Hosting, enabling AI-powered fe
 
 == Description ==
 
-This plugin that integrates [mittwald AI Hosting](https://developer.mittwald.de/docs/v2/platform/aihosting/) with the [WordPress AI Experiments Plugin](https://github.com/WordPress/ai), enabling AI-powered features on your WordPress site using mittwald's infrastructure.
+This plugin integrates [mittwald AI Hosting](https://developer.mittwald.de/docs/v2/platform/aihosting/) with the [WordPress AI Experiments Plugin](https://github.com/WordPress/ai), enabling AI-powered features on your WordPress site using mittwald's infrastructure.
 
 == Supported Operations & Models ==
 
