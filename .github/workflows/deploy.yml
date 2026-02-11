@@ -41,29 +41,18 @@ jobs:
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Verify plugin version matches tag
-        id: verify_version
-        shell: bash
-        run: |
-          FILE_VERSION=$(sed -nE 's/^ \* Version: *//p' mittwald-ai-provider.php | head -1)
-          TAG_VERSION="${{ steps.get_version.outputs.version }}"
-          if [ "$FILE_VERSION" != "$TAG_VERSION" ]; then
-            echo "❌ Version mismatch: tag version $TAG_VERSION vs file version $FILE_VERSION."
-            exit 1
-          fi
-          echo "✅ Version $FILE_VERSION matches tag $TAG_VERSION."
-
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
       - name: Create ZIP archive
-        run: composer run package
+        run: |
+          composer run package ${{ steps.get_version.outputs.version }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: mittwald-ai-provider.zip
-          body_path: CHANGELOG.md
+          files: mittwald-ai-provider.${{ steps.get_version.outputs.version }}.zip
+          generate_release_notes: true
           name: ${{ steps.get_version.outputs.version }}
           tag_name: ${{ steps.get_version.outputs.tag }}
         env:
