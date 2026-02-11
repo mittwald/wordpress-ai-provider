@@ -1,0 +1,100 @@
+name: Deploy WordPress Plugin
+
+on:
+  push:
+    tags:
+      - "^v[0-9]+.[0-9]+$"
+      - "^v[0-9]+.[0-9]+.[0-9]+$"
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Plugin
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install SVN
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y subversion
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer
+          coverage: none
+
+      - name: Get version from git tag (semver)
+        id: get_version
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+
+          # Strip leading "v"
+          VERSION="${TAG#v}"
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Create ZIP archive
+        run: |
+          composer run package ${{ steps.get_version.outputs.version }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: mittwald-ai-provider.${{ steps.get_version.outputs.version }}.zip
+          generate_release_notes: true
+          name: ${{ steps.get_version.outputs.version }}
+          tag_name: ${{ steps.get_version.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout WordPress SVN repository
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        run: |
+          svn checkout "https://plugins.svn.wordpress.org/mittwald-ai-provider" \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            --no-auth-cache \
+            --non-interactive \
+            --trust-server-cert \
+            svn
+
+      - name: Prepare SVN
+        working-directory: svn
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          rm -rf trunk/* tags/$VERSION
+          rm -rf assets/*
+          cp -r ../assets/* assets/
+          svn add assets/* --force
+          unzip mittwald-ai-provider.zip -d ./svn/trunk
+          svn add trunk/* --force
+          svn cp trunk tags/$VERSION
+          svn add tags/$VERSION --force
+          svn status | grep '^\!' | sed 's/! *//' | xargs -I% svn rm %@
+
+      - name: Commit to SVN
+        working-directory: svn
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          svn commit -m "Release version $VERSION" \
+            --username "$SVN_USERNAME" \
+            --password "$SVN_PASSWORD" \
+            --no-auth-cache \
+            --non-interactive \
+            --trust-server-cert

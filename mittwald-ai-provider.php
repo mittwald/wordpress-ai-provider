@@ -3,7 +3,7 @@
  * Plugin Name: mittwald AI provider
  * Plugin URI: https://github.com/mittwald/wordpress-ai-provider
  * Description: Adds mittwald AI hosting to the available AI providers
- * Version: 0.1
+ * Version: trunk
  * Author: mittwald, Lukas Fritze, Martin Helmich
  * Author URI: https://www.mittwald.de/
  * License: GPL-2.0-or-later

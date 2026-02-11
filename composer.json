@@ -24,11 +24,7 @@
     "analyse": "phpstan analyse --memory-limit=512M",
     "format": "phpcs",
     "format:fix": "phpcbf",
-    "package": [
-      "rm -f mittwald-ai-provider.zip",
-      "composer install --no-dev --optimize-autoloader",
-      "zip -r mittwald-ai-provider.zip includes vendor composer.* license.txt mittwald-ai-provider.php readme.txt"
-    ]
+    "package": "scripts/build-package.sh"
   },
   "config": {
     "allow-plugins": {
