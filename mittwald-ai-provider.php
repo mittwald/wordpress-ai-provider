@@ -101,16 +101,9 @@ add_action(
 		}
 
 		require_once $my_autoload;
-	},
-	20
-);
 
-add_action(
-	'wp_loaded',
-	function () {
 		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
 		$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
-
-		( new \WordPress\AI_Client\API_Credentials\API_Credentials_Manager() )->initialize();
-	}
+	},
+	20
 );
