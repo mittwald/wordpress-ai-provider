@@ -42,6 +42,7 @@ jobs:
           ddev wp core download
           ddev wp core install --url='$DDEV_PRIMARY_URL' --title='My WordPress site' --admin_user=admin --admin_password=admin --admin_email=admin@example.com
           ddev wp plugin install plugin-check --activate
+          ddev wp plugin install ai --activate
           ddev wp plugin install /var/www/html/mittwald-ai-provider.dev.zip --activate
 
       - name: Run Plugin Check
