@@ -47,8 +47,9 @@ function display_composer_notice(): void {
 			<?php
 			printf(
 			/* translators: %s: composer install command */
-				esc_html__( 'Your installation of the mittwald AI provider plugin is incomplete. Please run %s.', 'mittwald-ai-provider' ),
-				'<code>composer install</code>'
+				esc_html__( 'Your installation of the mittwald AI provider plugin is incomplete. Please run %1$s in the %2$s directory.', 'mittwald-ai-provider' ),
+				'<code>composer install --no-dev</code>',
+				'<code>' . esc_html( plugin_dir_path( __FILE__ ) ) . '</code>'
 			);
 			?>
 		</p>
