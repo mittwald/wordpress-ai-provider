@@ -7,7 +7,6 @@
  * Author: mittwald, Lukas Fritze, Martin Helmich
  * Author URI: https://www.mittwald.de/
  * License: GPL-2.0-or-later
- * Requires Plugins: ai
  */
 
 namespace Mittwald\AiProvider;
