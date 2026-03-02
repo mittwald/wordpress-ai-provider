@@ -116,7 +116,9 @@ add_action(
 		require_once $my_autoload;
 
 		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
-		$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
+		if ( ! $registry->hasProvider( MittwaldAIProvider::class ) ) {
+			$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
+		}
 	},
 	20
 );
