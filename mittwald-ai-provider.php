@@ -87,7 +87,7 @@ add_filter(
 );
 
 add_action(
-	'init',
+	'plugins_loaded',
 	function () {
 		// This plugin requires the WordPress AI client; in WordPress 6.9, this requires the
 		// "AI Experiments" plugin, while in WordPress 7.0+, the AI client is part of core.
@@ -119,7 +119,7 @@ add_action(
 );
 
 add_action(
-	'wp_loaded',
+	'init',
 	function () {
 		// TODO: Drop this once we drop WordPress 6.9 support.
 		if ( ! class_exists( \WordPress\AiClient\AiClient::class ) ) {
