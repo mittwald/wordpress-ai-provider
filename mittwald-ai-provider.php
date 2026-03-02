@@ -114,11 +114,18 @@ add_action(
 		}
 
 		require_once $my_autoload;
+	},
+	20
+);
 
+add_action(
+	'wp_loaded',
+	function () {
 		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
 		if ( ! $registry->hasProvider( MittwaldAIProvider::class ) ) {
 			$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
 		}
-	},
-	20
+
+		( new \WordPress\AI_Client\API_Credentials\API_Credentials_Manager() )->initialize();
+	}
 );
