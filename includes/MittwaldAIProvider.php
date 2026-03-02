@@ -60,13 +60,16 @@ class MittwaldAIProvider extends AbstractApiProvider {
 	protected static function createProviderMetadata(): ProviderMetadata {
 		$langUrlPart = str_starts_with( get_user_locale(), 'de' ) ? 'de/' : '';
 
+		/*
+		TODO: Add a proper description, as soon as we can safely depend on wordpress/php-ai-client ^1.2:
+		__( 'Use german-hosted and GDPR-compliant open-weight models hosted by mittwald', 'mittwald-ai-provider' )
+		*/
+
 		return new ProviderMetadata(
 			'mittwald',
 			'mittwald',
 			ProviderTypeEnum::cloud(),
 			'https://developer.mittwald.de/' . $langUrlPart . 'docs/v2/platform/aihosting/access-and-usage/access/',
-			null,
-			__( 'Use german-hosted and GDPR-compliant open-weight models hosted by mittwald', 'mittwald-ai-provider' )
 		);
 	}
 
