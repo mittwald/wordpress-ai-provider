@@ -1,18 +1,20 @@
-=== mittwald AI provider ===
+=== AI Provider for mittwald ===
 Contributors: mittwald, lukasfritzedev, mhelmich
 Tags: AI, llm
 Requires at least: 6.9
-Tested up to: 6.9
+Tested up to: 7.0-beta2
 Stable tag: trunk
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Connects WordPress AI Experiments to mittwald AI Hosting, enabling AI-powered features via an OpenAI-compatible provider integration.
+Connects WordPress AI to mittwald AI Hosting, enabling AI-powered features via an OpenAI-compatible provider integration.
 
 == Description ==
 
-This plugin integrates [mittwald AI Hosting](https://developer.mittwald.de/docs/v2/platform/aihosting/) with the [WordPress AI Experiments Plugin](https://wordpress.org/plugins/ai/), enabling AI-powered features on your WordPress site using mittwald's infrastructure.
+This plugin integrates [mittwald AI Hosting](https://developer.mittwald.de/docs/v2/platform/aihosting/) with WordPress AI features, enabling AI-powered features on your WordPress site using mittwald's infrastructure.
+
+On WordPress 6.9, you need to enable the [WordPress AI Experiments Plugin](https://wordpress.org/plugins/ai/) to use this plugin. Starting with WordPress 7.0, this plugin will work without the AI Experiments plugin, as the necessary features will be included in core.
 
 == Supported Operations & Models ==
 
@@ -34,7 +36,7 @@ Fully supported for conversational AI, content generation, and chat-based intera
 
 == Installation ==
 
-Make sure the Plugin [AI Experiments](https://wordpress.org/plugins/ai/) is installed. If not, install and activate it.
+If you are using WordPress 6.9, make sure the Plugin [AI Experiments](https://wordpress.org/plugins/ai/) is installed. If it is not installed, install and activate it. On WordPress 7.0 and later, the necessary features are included in core, so you can skip this step.
 
 Install this plugin:
 
