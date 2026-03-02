@@ -1,13 +1,12 @@
 <?php
 /**
- * Plugin Name: mittwald AI provider
+ * Plugin Name: AI Provider for mittwald
  * Plugin URI: https://github.com/mittwald/wordpress-ai-provider
  * Description: Adds mittwald AI hosting to the available AI providers
  * Version: trunk
  * Author: mittwald, Lukas Fritze, Martin Helmich
  * Author URI: https://www.mittwald.de/
  * License: GPL-2.0-or-later
- * Requires Plugins: ai
  */
 
 namespace Mittwald\AiProvider;
@@ -28,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function display_missing_ai_plugin_notice(): void {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The mittwald AI provider plugin requires the WordPress AI Client plugin to be installed and activated.', 'mittwald-ai-provider' ); ?></p>
+		<p><?php esc_html_e( 'The AI Provider for mittwald plugin requires either at least WordPress 7.0, or the AI Experiments plugin to be installed and activated.', 'mittwald-ai-provider' ); ?></p>
 	</div>
 	<?php
 }
@@ -47,9 +46,10 @@ function display_composer_notice(): void {
 		<p>
 			<?php
 			printf(
-			/* translators: %s: composer install command */
-				esc_html__( 'Your installation of the mittwald AI provider plugin is incomplete. Please run %s.', 'mittwald-ai-provider' ),
-				'<code>composer install</code>'
+				/* translators: %1$s: composer install command, %2$s: plugin directory path */
+				esc_html__( 'Your installation of the mittwald AI provider plugin is incomplete. Please run %1$s in the %2$s directory.', 'mittwald-ai-provider' ),
+				'<code>composer install --no-dev</code>',
+				'<code>' . esc_html( plugin_dir_path( __FILE__ ) ) . '</code>'
 			);
 			?>
 		</p>
@@ -81,19 +81,26 @@ add_filter(
 );
 
 add_action(
-	'plugins_loaded',
+	'init',
 	function () {
-		// Note: We assume that the Composer autoloader of the "ai" plugin is already loaded,
-		// because that plugin does so in the `plugins_loaded` action with default priority (10).
-		// We use priority 20 to ensure our code runs *after* that.
+		// This plugin requires the WordPress AI client; in WordPress 6.9, this requires the
+		// "AI Experiments" plugin, while in WordPress 7.0+, the AI client is part of core.
 		//
-		// For this reason, there is no realistic way for this check to fail; this is just us
-		// being defensive.
+		// For the latter reason, we cannot simply use a plugin dependency to require the
+		// "AI Experiments" plugin, since that would prevent the mittwald AI provider from
+		// being used on WordPress 7.0+. Therefore, we check for the existence of the main
+		// class of the AI client plugin, and if it's not present, we display an admin notice
+		// about the missing dependency.
 		if ( ! class_exists( \WordPress\AiClient\AiClient::class ) ) {
 			add_action( 'admin_notices', __NAMESPACE__ . '\\display_missing_ai_plugin_notice' );
 			return;
 		}
 
+		// vendor/autoload.php *should* always be present, since we ship the plugin with its
+		// dependencies installed. However, in development setups (e.g. when cloning the plugin
+		// from GitHub), it's possible for the plugin to be missing its dependencies if
+		// `composer install` hasn't been run. In that case, we display an admin notice about
+		// the missing dependencies.
 		$my_autoload = __DIR__ . '/vendor/autoload.php';
 		if ( ! file_exists( $my_autoload ) ) {
 			add_action( 'admin_notices', __NAMESPACE__ . '\\display_composer_notice' );
@@ -109,7 +116,9 @@ add_action(
 	'wp_loaded',
 	function () {
 		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
-		$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
+		if ( ! $registry->hasProvider( MittwaldAIProvider::class ) ) {
+			$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
+		}
 
 		( new \WordPress\AI_Client\API_Credentials\API_Credentials_Manager() )->initialize();
 	}
