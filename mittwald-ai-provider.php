@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: mittwald AI provider
+ * Plugin Name: AI Provider for mittwald
  * Plugin URI: https://github.com/mittwald/wordpress-ai-provider
  * Description: Adds mittwald AI hosting to the available AI providers
  * Version: trunk
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function display_missing_ai_plugin_notice(): void {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The mittwald AI provider plugin requires the WordPress AI Client plugin to be installed and activated.', 'mittwald-ai-provider' ); ?></p>
+		<p><?php esc_html_e( 'The AI Provider for mittwald plugin requires either at least WordPress 7.0, or the AI Experiments plugin to be installed and activated.', 'mittwald-ai-provider' ); ?></p>
 	</div>
 	<?php
 }
