@@ -87,7 +87,7 @@ if ( str_starts_with( wp_get_wp_version(), '6.9' ) ) {
 }
 
 add_action(
-	'plugins_loaded',
+	'init',
 	function () {
 		// This plugin requires the WordPress AI client; in WordPress 6.9, this requires the
 		// "AI Experiments" plugin, while in WordPress 7.0+, the AI client is part of core.
