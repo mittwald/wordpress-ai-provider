@@ -62,23 +62,29 @@ function display_composer_notice(): void {
  *
  * NOTE: This plugin does not actually have its own settings page; instead,
  * we piggyback on the settings page of the main `ai` plugin.
+ *
+ * NOTE: This is only necessary for WordPress 6.9; in WordPress 7, AI
+ * providers will be discovered automatically, without having to inject
+ * themselves into the settings page.
  */
-add_filter(
-	'plugin_action_links_' . plugin_basename( __FILE__ ),
-	function ( array $links ): array {
-		$settings_link = sprintf(
-			'<a href="%1$s">%2$s</a>',
-			admin_url( 'options-general.php?page=wp-ai-client' ),
-			// use translation from required plugin `ai`.
-			// phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
-			esc_html__( 'Settings', 'ai' )
-		);
+if ( str_starts_with( wp_get_wp_version(), '6.9' ) ) {
+	add_filter(
+		'plugin_action_links_' . plugin_basename( __FILE__ ),
+		function ( array $links ): array {
+			$settings_link = sprintf(
+				'<a href="%1$s">%2$s</a>',
+				admin_url( 'options-general.php?page=wp-ai-client' ),
+				// use translation from required plugin `ai`.
+                    // phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
+					esc_html__( 'Settings', 'ai' )
+			);
 
-		array_unshift( $links, $settings_link );
+			array_unshift( $links, $settings_link );
 
-		return $links;
-	}
-);
+			return $links;
+		}
+	);
+}
 
 add_action(
 	'plugins_loaded',
