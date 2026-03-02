@@ -120,6 +120,9 @@ add_action(
 			$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
 		}
 
-		( new \WordPress\AI_Client\API_Credentials\API_Credentials_Manager() )->initialize();
+		// TODO: Drop this once we drop WordPress 6.9 support.
+		if ( class_exists( \WordPress\AI_Client\API_Credentials\API_Credentials_Manager::class ) ) {
+			( new \WordPress\AI_Client\API_Credentials\API_Credentials_Manager() )->initialize();
+		}
 	}
 );
