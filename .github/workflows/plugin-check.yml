@@ -6,6 +6,10 @@ on:
 
 jobs:
   plugin-check:
+    strategy:
+      matrix:
+        wordpress-version: [ '6.9', '7.0-beta2' ]
+        php-version: [ '8.5' ]
     name: Check Wordpress Plugin
     runs-on: ubuntu-latest
     steps:
@@ -15,7 +19,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
+          php-version: ${{ matrix.php-version }}
           tools: composer
           coverage: none
 
@@ -39,10 +43,19 @@ jobs:
         run: |
           ddev config --project-type=wordpress
           ddev start
-          ddev wp core download
+          ddev wp core download --version=${{ matrix.wordpress-version }}
           ddev wp core install --url='$DDEV_PRIMARY_URL' --title='My WordPress site' --admin_user=admin --admin_password=admin --admin_email=admin@example.com
           ddev wp plugin install plugin-check --activate
+
+      - name: Install AI experiments (6.9 only)
+        working-directory: build
+        if: ${{ matrix.wordpress-version == '6.9' }}
+        run: |
           ddev wp plugin install ai --activate
+
+      - name: Install AI provider
+        working-directory: build
+        run: |
           ddev wp plugin install /var/www/html/mittwald-ai-provider.zip --activate
 
       - name: Run Plugin Check
