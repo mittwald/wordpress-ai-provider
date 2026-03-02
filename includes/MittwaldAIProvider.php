@@ -65,6 +65,8 @@ class MittwaldAIProvider extends AbstractApiProvider {
 			'mittwald',
 			ProviderTypeEnum::cloud(),
 			'https://developer.mittwald.de/' . $langUrlPart . 'docs/v2/platform/aihosting/access-and-usage/access/',
+			null,
+			__( 'Use german-hosted and GDPR-compliant open-weight models hosted by mittwald', 'mittwald-ai-provider' )
 		);
 	}
 
