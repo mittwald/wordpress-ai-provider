@@ -79,7 +79,7 @@ jobs:
           rm -rf assets/*
           cp -r ../assets/* assets/
           svn add assets/* --force
-          unzip mittwald-ai-provider.zip -d ./svn/trunk
+          unzip mittwald-ai-provider.${{ steps.get_version.outputs.version }}.zip -d ./svn/trunk
           svn add trunk/* --force
           svn cp trunk tags/$VERSION
           svn add tags/$VERSION --force
