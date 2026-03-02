@@ -89,17 +89,24 @@ if ( str_starts_with( wp_get_wp_version(), '6.9' ) ) {
 add_action(
 	'plugins_loaded',
 	function () {
-		// Note: We assume that the Composer autoloader of the "ai" plugin is already loaded,
-		// because that plugin does so in the `plugins_loaded` action with default priority (10).
-		// We use priority 20 to ensure our code runs *after* that.
+		// This plugin requires the WordPress AI client; in WordPress 6.9, this requires the
+		// "AI Experiments" plugin, while in WordPress 7.0+, the AI client is part of core.
 		//
-		// For this reason, there is no realistic way for this check to fail; this is just us
-		// being defensive.
+		// For the latter reason, we cannot simply use a plugin dependency to require the
+		// "AI Experiments" plugin, since that would prevent the mittwald AI provider from
+		// being used on WordPress 7.0+. Therefore, we check for the existence of the main
+		// class of the AI client plugin, and if it's not present, we display an admin notice
+		// about the missing dependency.
 		if ( ! class_exists( \WordPress\AiClient\AiClient::class ) ) {
 			add_action( 'admin_notices', __NAMESPACE__ . '\\display_missing_ai_plugin_notice' );
 			return;
 		}
 
+		// vendor/autoload.php *should* always be present, since we ship the plugin with its
+		// dependencies installed. However, in development setups (e.g. when cloning the plugin
+		// from GitHub), it's possible for the plugin to be missing its dependencies if
+		// `composer install` hasn't been run. In that case, we display an admin notice about
+		// the missing dependencies.
 		$my_autoload = __DIR__ . '/vendor/autoload.php';
 		if ( ! file_exists( $my_autoload ) ) {
 			add_action( 'admin_notices', __NAMESPACE__ . '\\display_composer_notice' );
