@@ -1,6 +1,6 @@
 === AI Provider for mittwald ===
 Contributors: mittwald, lukasfritzedev, mhelmich
-Tags: AI, llm
+Tags: AI, llm, gpt, artificial-intelligence, connector
 Requires at least: 6.9
 Tested up to: 7.0-beta2
 Stable tag: trunk
