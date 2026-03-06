@@ -120,6 +120,10 @@ add_action(
 			return;
 		}
 
+		if ( ! class_exists( \Mittwald\AiProvider\MittwaldAIProvider::class ) ) {
+			return;
+		}
+
 		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
 		if ( ! $registry->hasProvider( MittwaldAIProvider::class ) ) {
 			$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
