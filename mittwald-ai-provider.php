@@ -66,7 +66,7 @@ function display_composer_notice(): void {
 add_filter(
 	'plugin_action_links_' . plugin_basename( __FILE__ ),
 	function ( array $links ): array {
-		$settings_page_url = '/wp-admin/options-connectors.php';
+		$settings_page_url = 'options-connectors.php';
 		// TODO: Drop this once we drop WordPress 6.9 support.
 		if ( str_starts_with( wp_get_wp_version(), '6.9' ) ) {
 			$settings_page_url = 'options-general.php?page=wp-ai-client';
