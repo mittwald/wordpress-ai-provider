@@ -2,7 +2,7 @@
 Contributors: mittwald, lukasfritzedev, mhelmich
 Tags: AI, llm, gpt, artificial-intelligence, connector
 Requires at least: 6.9
-Tested up to: 7.0-beta2
+Tested up to: 7.0-beta3
 Stable tag: trunk
 Requires PHP: 7.4
 License: GPLv2 or later
@@ -44,13 +44,18 @@ Install this plugin:
 * Download the plugin files and upload it manually to the server
 * Activate the plugin
 
+Alternatively, use the WP CLI to install this plugin:
+
+`wp plugin install --activate mittwald-ai-provider`
+
 = Configuration =
 
 1. **Obtain an API Key**: Follow the [mittwald AI Hosting access guide](https://developer.mittwald.de/docs/v2/platform/aihosting/access-and-usage/access/) to get your API credentials.
 2. **Store AI Client Credentials**:
-    - Navigate to Settings > AI Credentials (`/wp-admin/options-general.php?page=wp-ai-client`)
+    - **WordPress 6.9 only**: Navigate to Settings > AI Credentials (`/wp-admin/options-general.php?page=wp-ai-client`)
+    - **WordPRess 7.0 and later**: Savigate to Settings > Connectors (`/wp-admin/options-connectors.php`)
     - Fill in the mittwald API key and save
-3. **Enable AI experiments**:
+3. **Enable AI experiments** (WordPress 6.9 only):
     - Navigate to Settings > AI Experiments (`/options-general.php?page=ai-experiments`)
     - Select »Enable Experiments« and Save
     - Select the Experiments you want to use and Save
@@ -67,4 +72,4 @@ mittwald AI Hosting has usage limits based on your account tier. For details on 
 
 == Screenshots ==
 
-1. AI Credentials settings page where you can enter your mittwald AI Hosting API key.
+1. AI Connectors settings page where you can enter your mittwald AI Hosting API key.
