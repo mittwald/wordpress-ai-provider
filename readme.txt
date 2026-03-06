@@ -53,7 +53,7 @@ Alternatively, use the WP CLI to install this plugin:
 1. **Obtain an API Key**: Follow the [mittwald AI Hosting access guide](https://developer.mittwald.de/docs/v2/platform/aihosting/access-and-usage/access/) to get your API credentials.
 2. **Store AI Client Credentials**:
     - **WordPress 6.9 only**: Navigate to Settings > AI Credentials (`/wp-admin/options-general.php?page=wp-ai-client`)
-    - **WordPRess 7.0 and later**: Savigate to Settings > Connectors (`/wp-admin/options-connectors.php`)
+    - **WordPress 7.0 and later**: Navigate to Settings > Connectors (`/wp-admin/options-connectors.php`)
     - Fill in the mittwald API key and save
 3. **Enable AI experiments** (WordPress 6.9 only):
     - Navigate to Settings > AI Experiments (`/options-general.php?page=ai-experiments`)
