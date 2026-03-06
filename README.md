@@ -18,14 +18,13 @@ to leverage mittwald's AI hosting platform for various AI Experiments.
 [`OpenAIProvider` in `php-ai-client`](https://github.com/WordPress/php-ai-client/tree/trunk/src/ProviderImplementations/OpenAi) and adapted for mittwald's AI hosting platform, which uses an OpenAI-compatible API.
 
 ## Requirements
-- WordPress 6.8 or higher
-- [WordPress AI Experiments Plugin](https://github.com/WordPress/ai)
+- WordPress 6.9 or higher
+- [WordPress AI Experiments Plugin](https://github.com/WordPress/ai) (when using WordPress 6.9)
 - A [mittwald AI Hosting](https://www.mittwald.de/mstudio/ai-hosting) account with API access
 
 ## Installation
 
-Make sure the Plugin [AI Experiments](https://wordpress.org/plugins/ai/) is 
-installed. If not, install and activate it.
+If you are using WordPress 6.9, make sure the Plugin [AI Experiments](https://wordpress.org/plugins/ai/) is installed. If it is not installed, install and activate it. On WordPress 7.0 and later, the necessary features are included in core, so you can skip this step.
 
 Install this plugin:
 
@@ -35,20 +34,20 @@ Install this plugin:
     and click "Upload Plugin".
   * Choose the downloaded ZIP file and click "Install Now".
 * Activate the Plugin
- 
-### AI Experiments plugin
 
-Currently, the WordPress AI Experiments plugin does not officially support 
-registration of custom AI providers. This is [planned for a next release](https://make.wordpress.org/ai/2025/11/27/announcing-the-ai-experiments-plugin-v0-1-0/).
-Therefore, the current way the provider is registered could break with an 
-upcoming WordPress release. 
+Alternatively, use the WP CLI to install this plugin:
+
+```shellsession
+$ wp plugin install --activate mittwald-ai-provider`
+```
 
 ## Configuration
 1. **Obtain an API Key**: Follow the [mittwald AI Hosting access guide](https://developer.mittwald.de/docs/v2/platform/aihosting/access-and-usage/access/) to get your API credentials.
 2. **Store AI Client Credentials**:
-    - Navigate to Settings > AI Credentials (`/wp-admin/options-general.php?page=wp-ai-client`)
+    - **WordPress 6.9 only**: Navigate to Settings > AI Credentials (`/wp-admin/options-general.php?page=wp-ai-client`)
+    - **WordPRess 7.0 and later**: Savigate to Settings > Connectors (`/wp-admin/options-connectors.php`)
     - Fill in the mittwald API key and save
-3. **Enable AI experiments**:
+3. **Enable AI experiments** (WordPress 6.9 only):
     - Navigate to Settings > AI Experiments (`/options-general.php?page=ai-experiments`)
     - Select »Enable Experiments« and Save
     - Select the Experiments you want to use and Save
