@@ -75,9 +75,7 @@ add_filter(
 		$settings_link = sprintf(
 			'<a href="%1$s">%2$s</a>',
 			admin_url( $settings_page_url ),
-			// use translation from required plugin `ai`.
-			// phpcs:ignore WordPress.WP.I18n.TextDomainMismatch
-			esc_html__( 'Settings', 'ai' )
+			esc_html__( 'Settings', 'mittwald-ai-provider' )
 		);
 
 		array_unshift( $links, $settings_link );
