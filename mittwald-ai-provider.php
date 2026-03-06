@@ -115,6 +115,11 @@ add_action(
 add_action(
 	'wp_loaded',
 	function () {
+		// TODO: Drop this once we drop WordPress 6.9 support.
+		if ( ! class_exists( \WordPress\AiClient\AiClient::class ) ) {
+			return;
+		}
+
 		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
 		if ( ! $registry->hasProvider( MittwaldAIProvider::class ) ) {
 			$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
