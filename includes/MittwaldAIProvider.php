@@ -9,6 +9,7 @@ use WordPress\AiClient\Providers\Contracts\ModelMetadataDirectoryInterface;
 use WordPress\AiClient\Providers\Contracts\ProviderAvailabilityInterface;
 use WordPress\AiClient\Providers\DTO\ProviderMetadata;
 use WordPress\AiClient\Providers\Enums\ProviderTypeEnum;
+use WordPress\AiClient\Providers\Http\Enums\RequestAuthenticationMethod;
 use WordPress\AiClient\Providers\Models\Contracts\ModelInterface;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 
@@ -58,18 +59,25 @@ class MittwaldAIProvider extends AbstractApiProvider {
 	 * @since 0.1.0
 	 */
 	protected static function createProviderMetadata(): ProviderMetadata {
-		$langUrlPart = str_starts_with( get_user_locale(), 'de' ) ? 'de/' : '';
+		$langUrlPart    = str_starts_with( get_user_locale(), 'de' ) ? 'de/' : '';
+		$credentialsUrl = 'https://developer.mittwald.de/' . $langUrlPart . 'docs/v2/platform/aihosting/access-and-usage/access/';
 
-		/*
-		TODO: Add a proper description, as soon as we can safely depend on wordpress/php-ai-client ^1.2:
-		__( 'Use german-hosted and GDPR-compliant open-weight models hosted by mittwald', 'mittwald-ai-provider' )
-		*/
+		if ( str_starts_with( wp_get_wp_version(), '6.9' ) ) {
+			return new ProviderMetadata(
+				'mittwald',
+				'mittwald',
+				ProviderTypeEnum::cloud(),
+				$credentialsUrl,
+			);
+		}
 
 		return new ProviderMetadata(
 			'mittwald',
 			'mittwald',
 			ProviderTypeEnum::cloud(),
-			'https://developer.mittwald.de/' . $langUrlPart . 'docs/v2/platform/aihosting/access-and-usage/access/',
+			$credentialsUrl,
+			RequestAuthenticationMethod::apiKey(),
+			__( 'Use german-hosted and GDPR-compliant open-weight models hosted by mittwald', 'mittwald-ai-provider' )
 		);
 	}
 
