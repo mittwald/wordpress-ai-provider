@@ -17,17 +17,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Display admin notice about missing required AI plugin.
+ * Determines whether the current WordPress version is supported.
  *
- * The mittwald AI provider plugin depends on the WordPress AI Client plugin, so
- * there *should* not be any way for a user to activate this plugin without having
- * the required plugin installed and activated. However, in case that does happen,
- * this notice will inform the user about the issue.
+ * This plugin supports WordPress 7.0+, including 7.0 pre-releases.
+ *
+ * @param string $version WordPress version.
+ */
+function is_supported_wordpress_version( string $version ): bool {
+	return version_compare( $version, '7.0', '>=' ) || str_starts_with( $version, '7.0-' );
+}
+
+/**
+ * Display admin notice about unsupported WordPress version.
+ */
+function display_unsupported_wordpress_version_notice(): void {
+	?>
+	<div class="notice notice-error">
+		<p>
+			<?php
+			printf(
+				/* translators: %s: current WordPress version */
+				esc_html__( 'The AI Provider for mittwald plugin requires WordPress 7.0 or newer, including WordPress 7.0 pre-releases. Current version: %s.', 'mittwald-ai-provider' ),
+				'<code>' . esc_html( wp_get_wp_version() ) . '</code>'
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+
+/**
+ * Display admin notice about missing required AI client.
+ *
+ * WordPress 7.0+ ships with the AI client in core. If the client class is still
+ * unavailable, this notice informs the user about the missing dependency.
  */
 function display_missing_ai_plugin_notice(): void {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AI Provider for mittwald plugin requires either at least WordPress 7.0, or the AI Experiments plugin to be installed and activated.', 'mittwald-ai-provider' ); ?></p>
+		<p><?php esc_html_e( 'The AI Provider for mittwald plugin requires the WordPress AI client available in WordPress 7.0 and newer (including 7.0 pre-releases).', 'mittwald-ai-provider' ); ?></p>
 	</div>
 	<?php
 }
@@ -67,10 +95,6 @@ add_filter(
 	'plugin_action_links_' . plugin_basename( __FILE__ ),
 	function ( array $links ): array {
 		$settings_page_url = 'options-connectors.php';
-		// TODO: Drop this once we drop WordPress 6.9 support.
-		if ( str_starts_with( wp_get_wp_version(), '6.9' ) ) {
-			$settings_page_url = 'options-general.php?page=wp-ai-client';
-		}
 
 		$settings_link = sprintf(
 			'<a href="%1$s">%2$s</a>',
@@ -87,14 +111,14 @@ add_filter(
 add_action(
 	'plugins_loaded',
 	function () {
-		// This plugin requires the WordPress AI client; in WordPress 6.9, this requires the
-		// "AI Experiments" plugin, while in WordPress 7.0+, the AI client is part of core.
-		//
-		// For the latter reason, we cannot simply use a plugin dependency to require the
-		// "AI Experiments" plugin, since that would prevent the mittwald AI provider from
-		// being used on WordPress 7.0+. Therefore, we check for the existence of the main
-		// class of the AI client plugin, and if it's not present, we display an admin notice
-		// about the missing dependency.
+		$wp_version = wp_get_wp_version();
+		if ( ! is_supported_wordpress_version( $wp_version ) ) {
+			add_action( 'admin_notices', __NAMESPACE__ . '\\display_unsupported_wordpress_version_notice' );
+			return;
+		}
+
+		// This plugin requires the WordPress AI client, which is part of WordPress core
+		// starting with WordPress 7.0. If unavailable, show an admin notice.
 		if ( ! class_exists( \WordPress\AiClient\AiClient::class ) ) {
 			add_action( 'admin_notices', __NAMESPACE__ . '\\display_missing_ai_plugin_notice' );
 			return;
@@ -119,7 +143,7 @@ add_action(
 add_action(
 	'init',
 	function () {
-		// TODO: Drop this once we drop WordPress 6.9 support.
+		// Guard against unexpected load-order issues.
 		if ( ! class_exists( \WordPress\AiClient\AiClient::class ) ) {
 			return;
 		}
@@ -131,11 +155,6 @@ add_action(
 		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
 		if ( ! $registry->hasProvider( MittwaldAIProvider::class ) ) {
 			$registry->registerProvider( \Mittwald\AiProvider\MittwaldAIProvider::class );
-		}
-
-		// TODO: Drop this once we drop WordPress 6.9 support.
-		if ( class_exists( \WordPress\AI_Client\API_Credentials\API_Credentials_Manager::class ) ) {
-			( new \WordPress\AI_Client\API_Credentials\API_Credentials_Manager() )->initialize();
 		}
 	}
 );
