@@ -2,7 +2,7 @@
 Contributors: mittwald, lukasfritzedev, mhelmich
 Tags: AI, llm, gpt, artificial-intelligence, connector
 Requires at least: 6.9
-Tested up to: 7.0-beta3
+Tested up to: 7.0-beta5
 Stable tag: trunk
 Requires PHP: 7.4
 License: GPLv2 or later
