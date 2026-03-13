@@ -24,7 +24,7 @@ jobs:
           coverage: none
 
       - name: Install Dependencies
-        run: composer install --no-interaction --no-progress --prefer-dist
+        run: composer install --no-dev --no-interaction --no-progress --prefer-dist
 
       - name: Build package
         run: |
@@ -46,11 +46,6 @@ jobs:
           ddev wp core download --version=${{ matrix.wordpress-version }}
           ddev wp core install --url='$DDEV_PRIMARY_URL' --title='My WordPress site' --admin_user=admin --admin_password=admin --admin_email=admin@example.com
           ddev wp plugin install plugin-check --activate
-
-      - name: Install AI experiments
-        working-directory: build
-        run: |
-          ddev wp plugin install ai --activate
 
       - name: Install AI provider
         working-directory: build
