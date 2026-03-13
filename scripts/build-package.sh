@@ -25,4 +25,4 @@ ${sed} -i -e "s,Stable tag: trunk,Stable tag: ${version}," readme.txt
 
 composer install --no-dev --optimize-autoloader
 
-zip -r "mittwald-ai-provider.${version}.zip" includes vendor composer.* license.txt mittwald-ai-provider.php readme.txt
+zip -r "mittwald-ai-provider.${version}.zip" includes vendor composer.* license.txt mittwald-ai-provider.php readme.txt assets/icon.svg

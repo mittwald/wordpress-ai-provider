@@ -61,6 +61,10 @@ class MittwaldAIProvider extends AbstractApiProvider {
 	protected static function createProviderMetadata(): ProviderMetadata {
 		$langUrlPart    = str_starts_with( get_user_locale(), 'de' ) ? 'de/' : '';
 		$credentialsUrl = 'https://developer.mittwald.de/' . $langUrlPart . 'docs/v2/platform/aihosting/access-and-usage/access/';
+		$logoPath       = realpath( dirname( __DIR__ ) . '/assets/icon.svg' );
+		if ( ! $logoPath ) {
+			$logoPath = null;
+		}
 
 		return new ProviderMetadata(
 			'mittwald',
@@ -68,7 +72,8 @@ class MittwaldAIProvider extends AbstractApiProvider {
 			ProviderTypeEnum::cloud(),
 			$credentialsUrl,
 			RequestAuthenticationMethod::apiKey(),
-			__( 'Use german-hosted and GDPR-compliant open-weight models hosted by mittwald', 'mittwald-ai-provider' )
+			__( 'Use german-hosted and GDPR-compliant open-weight models hosted by mittwald', 'mittwald-ai-provider' ),
+			$logoPath
 		);
 	}
 
