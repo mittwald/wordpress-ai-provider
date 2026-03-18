@@ -62,15 +62,6 @@ class MittwaldAIProvider extends AbstractApiProvider {
 		$langUrlPart    = str_starts_with( get_user_locale(), 'de' ) ? 'de/' : '';
 		$credentialsUrl = 'https://developer.mittwald.de/' . $langUrlPart . 'docs/v2/platform/aihosting/access-and-usage/access/';
 
-		if ( str_starts_with( wp_get_wp_version(), '6.9' ) ) {
-			return new ProviderMetadata(
-				'mittwald',
-				'mittwald',
-				ProviderTypeEnum::cloud(),
-				$credentialsUrl,
-			);
-		}
-
 		return new ProviderMetadata(
 			'mittwald',
 			'mittwald',

@@ -2,7 +2,7 @@
 Contributors: mittwald, lukasfritzedev, mhelmich
 Tags: AI, llm, gpt, artificial-intelligence, connector
 Requires at least: 6.9
-Tested up to: 7.0-beta3
+Tested up to: 7.0-beta5
 Stable tag: trunk
 Requires PHP: 7.4
 License: GPLv2 or later
@@ -14,7 +14,7 @@ Connects WordPress AI to mittwald AI Hosting, enabling AI-powered features via a
 
 This plugin integrates [mittwald AI Hosting](https://developer.mittwald.de/docs/v2/platform/aihosting/) with WordPress AI features, enabling AI-powered features on your WordPress site using mittwald's infrastructure.
 
-On WordPress 6.9, you need to enable the [WordPress AI Experiments Plugin](https://wordpress.org/plugins/ai/) to use this plugin. Starting with WordPress 7.0, this plugin will work without the AI Experiments plugin, as the necessary features will be included in core.
+This plugin requires WordPress 7.0 or newer, including WordPress 7.0 pre-releases.
 
 == Supported Operations & Models ==
 
@@ -36,8 +36,6 @@ Fully supported for conversational AI, content generation, and chat-based intera
 
 == Installation ==
 
-If you are using WordPress 6.9, make sure the Plugin [AI Experiments](https://wordpress.org/plugins/ai/) is installed. If it is not installed, install and activate it. On WordPress 7.0 and later, the necessary features are included in core, so you can skip this step.
-
 Install this plugin:
 
 * Install the plugin in the WordPress Dashboard or
@@ -52,10 +50,10 @@ Alternatively, use the WP CLI to install this plugin:
 
 1. **Obtain an API Key**: Follow the [mittwald AI Hosting access guide](https://developer.mittwald.de/docs/v2/platform/aihosting/access-and-usage/access/) to get your API credentials.
 2. **Store AI Client Credentials**:
-    - **WordPress 6.9 only**: Navigate to Settings > AI Credentials (`/wp-admin/options-general.php?page=wp-ai-client`)
-    - **WordPress 7.0 and later**: Navigate to Settings > Connectors (`/wp-admin/options-connectors.php`)
+    - Navigate to Settings > Connectors (`/wp-admin/options-connectors.php`)
     - Fill in the mittwald API key and save
-3. **Enable AI experiments** (WordPress 6.9 only):
+3. **Enable AI experiments** (optional):
+    - To actually use the connector, you need a plugin that makes use of the AI connector. The Plugin [AI Experiments](https://wordpress.org/plugins/ai/) is the official example. Install and activate the plugin.
     - Navigate to Settings > AI Experiments (`/options-general.php?page=ai-experiments`)
     - Select »Enable Experiments« and Save
     - Select the Experiments you want to use and Save
