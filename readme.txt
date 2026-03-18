@@ -1,7 +1,7 @@
 === AI Provider for mittwald ===
 Contributors: mittwald, lukasfritzedev, mhelmich
 Tags: AI, llm, gpt, artificial-intelligence, connector
-Requires at least: 6.9
+Requires at least: 7.0
 Tested up to: 7.0-beta5
 Stable tag: trunk
 Requires PHP: 7.4
