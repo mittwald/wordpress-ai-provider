@@ -43,9 +43,25 @@ $ wp plugin install --activate mittwald-ai-provider`
 
 ## Configuration
 1. **Obtain an API Key**: Follow the [mittwald AI Hosting access guide](https://developer.mittwald.de/docs/v2/platform/aihosting/access-and-usage/access/) to get your API credentials.
-2. **Store AI Client Credentials**:
-    - Navigate to Settings > Connectors (`/wp-admin/options-connectors.php`)
-    - Fill in the mittwald API key and save
+2. **Store AI Client Credentials** (choose one):
+    - In WordPress admin:
+      - Navigate to Settings > Connectors (`/wp-admin/options-connectors.php`)
+      - Fill in the mittwald API key and save
+    - In `wp-config.php` via WP-CLI:
+
+      ```shellsession
+      $ wp config set MITTWALD_API_KEY your-api-key
+      ```
+    - In `wp-config.php` via direct file edit:
+
+      ```php
+      define( 'MITTWALD_API_KEY', 'your-api-key' );
+      ```
+    - As environment variable (for example in Apache config):
+
+      ```apacheconf
+      SetEnv MITTWALD_API_KEY your-api-key
+      ```
 3. **Enable AI experiments** (optional):
     - To actually use the connector, you need a plugin that makes use of the AI connector. The Plugin [AI Experiments](https://github.com/WordPress/ai) is the official example. Install and activate the plugin.
     - Navigate to Settings > AI Experiments (`/options-general.php?page=ai-experiments`)
