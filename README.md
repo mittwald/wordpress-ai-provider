@@ -75,6 +75,7 @@ Fully supported for conversational AI, content generation, and chat-based intera
 
 **Available Models:**
 - **GPT-OSS models**: Open-source GPT-compatible models
+- **Qwen**: Qwen 3.5 122B-FP8 and Qwen 3.6 35B-FP8
 - **Ministral**: supports vision/image input
 - **Devstral**: optimized for code generation
 
