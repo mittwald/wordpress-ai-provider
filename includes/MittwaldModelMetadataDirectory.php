@@ -108,14 +108,14 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 					switch ( $modelId ) {
 						case 'gpt-oss-120b':
 						case 'Qwen3-Coder-30B-Instruct':
-						case 'Qwen3.5-122B-FP8':
-						case 'Qwen3.6-35B-FP8':
 						case 'Devstral-Small-2-24B-Instruct-2512':
 							$modelCaps    = $gptCapabilities;
 							$modelOptions = $gptOptions;
 							break;
 						case 'Mistral-Small-3.2-24B-Instruct':
 						case 'Ministral-3-14B-Instruct-2512':
+						case 'Qwen3.5-122B-FP8':
+						case 'Qwen3.6-35B-FP8':
 							$modelCaps    = $gptCapabilities;
 							$modelOptions = $gptMultimodalInputOptions;
 							break;
