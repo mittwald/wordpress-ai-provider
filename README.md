@@ -75,12 +75,13 @@ Fully supported for conversational AI, content generation, and chat-based intera
 
 **Available Models:**
 - **GPT-OSS models**: Open-source GPT-compatible models
+- **Qwen**: Qwen 3.5 122B-FP8 and Qwen 3.6 35B-FP8 (supports vision/image input)
 - **Ministral**: supports vision/image input
 - **Devstral**: optimized for code generation
 
 - **Capabilities:**
 - Standard text chat
-- Image vision (Mistral Small models only)
+- Image vision (Mistral Small and Qwen models)
 - JSON output formatting
 - Tool/function calling
 - Streaming responses
