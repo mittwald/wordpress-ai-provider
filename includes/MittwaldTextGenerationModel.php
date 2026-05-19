@@ -28,4 +28,23 @@ class MittwaldTextGenerationModel extends AbstractOpenAiCompatibleTextGeneration
 			$this->getRequestOptions()
 		);
 	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @since 0.1.0
+	 */
+	protected function prepareResponseFormatParam( ?array $outputSchema ): array {
+		if ( is_array( $outputSchema ) ) {
+			return array(
+				'type'        => 'json_schema',
+				'json_schema' => array(
+					'name'   => 'outputSchema',
+					'schema' => $outputSchema,
+				),
+			);
+		}
+
+		return array( 'type' => 'json_object' );
+	}
 }
