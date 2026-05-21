@@ -2,7 +2,7 @@
 Contributors: mittwald, lukasfritzedev, mhelmich
 Tags: AI, llm, gpt, artificial-intelligence, connector
 Requires at least: 7.0
-Tested up to: 7.0-beta5
+Tested up to: 7.0
 Stable tag: trunk
 Requires PHP: 7.4
 License: GPLv2 or later
@@ -14,7 +14,7 @@ Connects WordPress AI to mittwald AI Hosting, enabling AI-powered features via a
 
 This plugin integrates [mittwald AI Hosting](https://developer.mittwald.de/docs/v2/platform/aihosting/) with WordPress AI features, enabling AI-powered features on your WordPress site using mittwald's infrastructure.
 
-This plugin requires WordPress 7.0 or newer, including WordPress 7.0 pre-releases.
+This plugin requires WordPress 7.0 or newer.
 
 == Supported Operations & Models ==
 

@@ -1,8 +1,5 @@
 # mittwald AI Provider for WordPress
 
-> [!WARNING]
-> This plugin is experimental and not (yet) recommended for production usage.
-
 A WordPress plugin that integrates
 [mittwald AI Hosting](https://developer.mittwald.de/docs/v2/platform/aihosting/) 
 with WordPress AI features, enabling AI-powered features on your WordPress site

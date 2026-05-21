@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Determines whether the current WordPress version is supported.
  *
- * This plugin supports WordPress 7.0+, including 7.0 pre-releases.
+ * This plugin supports WordPress 7.0+.
  *
  * @param string $version WordPress version.
  */
@@ -37,7 +37,7 @@ function display_unsupported_wordpress_version_notice(): void {
 			<?php
 			printf(
 				/* translators: %s: current WordPress version */
-				esc_html__( 'The AI Provider for mittwald plugin requires WordPress 7.0 or newer, including WordPress 7.0 pre-releases. Current version: %s.', 'mittwald-ai-provider' ),
+				esc_html__( 'The AI Provider for mittwald plugin requires WordPress 7.0 or newer. Current version: %s.', 'mittwald-ai-provider' ),
 				'<code>' . esc_html( wp_get_wp_version() ) . '</code>'
 			);
 			?>
@@ -55,7 +55,7 @@ function display_unsupported_wordpress_version_notice(): void {
 function display_missing_ai_plugin_notice(): void {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AI Provider for mittwald plugin requires the WordPress AI client available in WordPress 7.0 and newer (including 7.0 pre-releases).', 'mittwald-ai-provider' ); ?></p>
+		<p><?php esc_html_e( 'The AI Provider for mittwald plugin requires the WordPress AI client available in WordPress 7.0 and newer.', 'mittwald-ai-provider' ); ?></p>
 	</div>
 	<?php
 }
