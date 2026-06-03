@@ -24,7 +24,7 @@ Fully supported for conversational AI, content generation, and chat-based intera
 
 **Available Models:**
 - **GPT-OSS models**: Open-source GPT-compatible models
-- **Qwen**: Qwen 3.5 122B-FP8 and Qwen 3.6 35B-FP8 (supports vision/image input), Qwen3-VL-Reranker, Qwen3.6-0.8B
+- **Qwen**: Qwen 3.5 122B-FP8 and Qwen 3.6 35B-FP8 (supports vision/image input), Qwen3.6-0.8B
 - **Ministral**: supports vision/image input
 - **Mistral Medium 3.5**
 - **GLM OCR**: `zai-org/GLM-OCR`
