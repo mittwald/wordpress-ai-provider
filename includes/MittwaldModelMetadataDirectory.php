@@ -117,7 +117,7 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 						case 'Ministral-3-14B-Instruct-2512':
 						case 'Qwen3.5-122B-A10B-FP8':
 						case 'Qwen3.6-35B-A3B-FP8':
-						case 'zai-org/GLM-OCR':
+						case 'GLM-OCR':
 							$modelCaps    = $gptCapabilities;
 							$modelOptions = $gptMultimodalInputOptions;
 							break;
