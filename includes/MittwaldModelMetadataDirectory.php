@@ -94,6 +94,15 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 				new SupportedOption( OptionEnum::outputModalities(), array( array( ModalityEnum::text() ) ) ),
 			)
 		);
+		$gptOcrCapabilities        = array(
+			CapabilityEnum::textGeneration(),
+		);
+		$gptOcrOptions             = array(
+			new SupportedOption( OptionEnum::maxTokens() ),
+			new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text(), ModalityEnum::image() ) ) ),
+			new SupportedOption( OptionEnum::outputModalities(), array( array( ModalityEnum::text() ) ) ),
+			new SupportedOption( OptionEnum::customOptions() ),
+		);
 
 		$modelsData = (array) $responseData['data'];
 
@@ -102,22 +111,33 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 				static function ( array $modelData ) use (
 					$gptCapabilities,
 					$gptOptions,
-					$gptMultimodalInputOptions
+					$gptMultimodalInputOptions,
+					$gptOcrCapabilities,
+					$gptOcrOptions
 				): ModelMetadata {
 					$modelId = $modelData['id'];
 					switch ( $modelId ) {
 						case 'gpt-oss-120b':
 						case 'Qwen3-Coder-30B-Instruct':
-						case 'Devstral-Small-2-24B-Instruct-2512':
+						case 'Qwen3.5-0.8B':
 							$modelCaps    = $gptCapabilities;
 							$modelOptions = $gptOptions;
 							break;
+						case 'Mistral-Medium-3.5-128B':
 						case 'Mistral-Small-3.2-24B-Instruct':
 						case 'Ministral-3-14B-Instruct-2512':
 						case 'Qwen3.5-122B-A10B-FP8':
 						case 'Qwen3.6-35B-A3B-FP8':
 							$modelCaps    = $gptCapabilities;
 							$modelOptions = $gptMultimodalInputOptions;
+							break;
+						case 'GLM-OCR':
+							$modelCaps    = $gptOcrCapabilities;
+							$modelOptions = $gptOcrOptions;
+							break;
+						case 'Qwen3-VL-Reranker':
+							$modelCaps    = array();
+							$modelOptions = array();
 							break;
 						default:
 							$modelCaps    = array();
