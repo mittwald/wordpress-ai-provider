@@ -111,7 +111,9 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 				static function ( array $modelData ) use (
 					$gptCapabilities,
 					$gptOptions,
-					$gptMultimodalInputOptions
+					$gptMultimodalInputOptions,
+					$gptOcrCapabilities,
+					$gptOcrOptions
 				): ModelMetadata {
 					$modelId = $modelData['id'];
 					switch ( $modelId ) {
