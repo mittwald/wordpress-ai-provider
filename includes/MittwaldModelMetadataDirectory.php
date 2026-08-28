@@ -104,6 +104,20 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 			new SupportedOption( OptionEnum::customOptions() ),
 		);
 
+		$ttsCapabilities = array(
+			CapabilityEnum::textToSpeechConversion(),
+		);
+		$ttsOptions      = array(
+			new SupportedOption( OptionEnum::outputSpeechVoice(), MittwaldTextToSpeechConversionModel::VOICES ),
+			new SupportedOption(
+				OptionEnum::outputMimeType(),
+				array_keys( MittwaldTextToSpeechConversionModel::RESPONSE_FORMATS )
+			),
+			new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
+			new SupportedOption( OptionEnum::outputModalities(), array( array( ModalityEnum::audio() ) ) ),
+			new SupportedOption( OptionEnum::customOptions() ),
+		);
+
 		$modelsData = (array) $responseData['data'];
 
 		$models = array_values(
@@ -113,7 +127,9 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 					$gptOptions,
 					$gptMultimodalInputOptions,
 					$gptOcrCapabilities,
-					$gptOcrOptions
+					$gptOcrOptions,
+					$ttsCapabilities,
+					$ttsOptions
 				): ModelMetadata {
 					$modelId = $modelData['id'];
 					switch ( $modelId ) {
@@ -128,12 +144,17 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 						case 'Ministral-3-14B-Instruct-2512':
 						case 'Qwen3.5-122B-A10B-FP8':
 						case 'Qwen3.6-35B-A3B-FP8':
+						case 'Qwen3.8-27B-NVFP4':
 							$modelCaps    = $gptCapabilities;
 							$modelOptions = $gptMultimodalInputOptions;
 							break;
 						case 'GLM-OCR':
 							$modelCaps    = $gptOcrCapabilities;
 							$modelOptions = $gptOcrOptions;
+							break;
+						case 'Qwen3-TTS-12Hz-1.7B-CustomVoice':
+							$modelCaps    = $ttsCapabilities;
+							$modelOptions = $ttsOptions;
 							break;
 						case 'Qwen3-VL-Reranker':
 							$modelCaps    = array();
