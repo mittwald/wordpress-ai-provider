@@ -111,4 +111,4 @@ jobs:
           say so.
           PROMPT_EOF
           )
-          opencode run --print-logs --thinking --auto "$PROMPT"
+          opencode run --thinking --auto "$PROMPT"
