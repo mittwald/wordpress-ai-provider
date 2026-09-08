@@ -40,6 +40,9 @@ class MittwaldAIProvider extends AbstractApiProvider {
 			if ( $capability->isTextGeneration() ) {
 				return new MittwaldTextGenerationModel( $modelMetadata, $providerMetadata );
 			}
+			if ( $capability->isTextToSpeechConversion() ) {
+				return new MittwaldTextToSpeechConversionModel( $modelMetadata, $providerMetadata );
+			}
 			if ( $capability->isEmbeddingGeneration() ) {
 				// TODO: Implement MittwaldEmbeddingConversionModel.
 				throw new RuntimeException(

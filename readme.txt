@@ -24,7 +24,7 @@ Fully supported for conversational AI, content generation, and chat-based intera
 
 **Available Models:**
 - **GPT-OSS models**: Open-source GPT-compatible models
-- **Qwen**: Qwen 3.5 122B-FP8 and Qwen 3.6 35B-FP8 (supports vision/image input), `Qwen3.5-0.8B`
+- **Qwen**: Qwen 3.5 122B-FP8, Qwen 3.6 35B-FP8 and Qwen 3.8 27B-NVFP4 (support vision/image input), `Qwen3.5-0.8B`
 - **Ministral**: supports vision/image input
 - **GLM OCR**: `GLM-OCR`
 
@@ -34,6 +34,16 @@ Fully supported for conversational AI, content generation, and chat-based intera
 - JSON output formatting
 - Tool/function calling
 - Streaming responses
+
+= Text to Speech =
+
+**Available Models:**
+- **Qwen TTS**: `Qwen3-TTS-12Hz-1.7B-CustomVoice`
+
+**Capabilities:**
+- Voices: `aiden`, `dylan`, `eric`, `ono_anna`, `ryan`, `serena`, `sohee`, `uncle_fu`, `vivian` (defaults to `aiden`)
+- Output formats: `audio/mpeg` (default), `audio/wav`, `audio/flac`, `audio/ogg`
+- Parameters such as `speed`, `language` and `instructions`
 
 == Installation ==
 
