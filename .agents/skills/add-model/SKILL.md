@@ -89,10 +89,30 @@ Two things specific to adding:
 
 Follow `.agents/skills/synchronize-mittwald-models/references/verifying.md`.
 
-Add the new model to the `$current` array in `verify_models.php` first,
-otherwise the matrix will not show it. Confirm it appears under exactly the
-capabilities Step 2 established, routes to the model class you expect, and that
-no other model's row changed.
+Add the new model to `ModelCatalogue::CURRENT` in
+`tests/includes/ModelCatalogue.php` first, otherwise the audit will not know
+about it. If the plugin exposes no capability for it yet, add it to
+`UNIMPLEMENTED` as well.
+
+Then run both suites:
+
+```bash
+composer run test              # unit suite, offline
+composer run test:integration  # real API, needs MITTWALD_AI_API_KEY
+```
+
+Add a case to the integration suite for the capability the model newly claims —
+`TextGenerationTest`, `VisionTest`, `OcrTest` or `TextToSpeechTest`, whichever
+fits. That is the only check that catches a capability the endpoint does not
+actually honour; every offline check passes on a wrong claim. If no API key is
+available the integration suite skips itself, which is a silent pass, not a
+green light — say so in the report rather than claiming end-to-end verification.
+
+Confirm the model resolves under exactly the capabilities Step 2 established,
+routes to the model class you expect, and that no other model's expectations
+changed. Adding a model also changes the picker order, so
+`ModelSortOrderTest::test_current_lineup_is_presented_in_the_expected_order()`
+needs its expected list updated deliberately.
 
 Then run `composer run analyse` and `composer run format`. Both are real signals
 in this repo and must stay clean.

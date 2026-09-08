@@ -13,9 +13,17 @@ composer install              # Install dependencies
 composer run analyse          # Run PHPStan static analysis (level 10)
 composer run format           # Check code formatting (WordPress Coding Standards)
 composer run format:fix       # Auto-fix formatting issues
+composer run test             # Run the unit test suite (offline)
+composer run test:integration # Run integration tests against the real API
 ```
 
-No test framework is configured yet. CI runs `composer run analyse` across PHP 7.4–8.5.
+CI runs `composer run analyse` and `composer run test` across PHP 7.4–8.5.
+
+Tests live in `tests/`; see `tests/README.md` for the layout. The unit suite runs
+offline against a fake HTTP transport and a small set of WordPress function
+stubs — no WordPress installation needed. The integration suite talks to the
+real mittwald AI hosting API and needs a `MITTWALD_AI_API_KEY` environment
+variable; without one it skips itself rather than failing.
 
 ## Architecture
 
@@ -40,13 +48,14 @@ mittwald AI Hosting offers:
   model table and reconcile the drift.
 
 They share `references/model-touchpoints.md` (every place a model ID appears)
-and `references/verifying.md`, plus two harnesses that exercise the real
-provider code:
+and `references/verifying.md`.
 
-```bash
-php .agents/skills/synchronize-mittwald-models/scripts/verify_class.php
-php .agents/skills/synchronize-mittwald-models/scripts/verify_models.php
-```
+Verification runs through the test suites rather than standalone scripts. The
+documented lineup lives in `tests/includes/ModelCatalogue.php` — its `CURRENT`,
+`RETIRED` and `UNIMPLEMENTED` lists are the one place to edit when models change
+upstream, and `ModelCatalogueTest` audits the plugin against them. After any
+model change run both suites; only `test:integration` catches a capability the
+endpoint does not actually honour.
 
 ## Conventions
 

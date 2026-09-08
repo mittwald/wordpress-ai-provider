@@ -61,12 +61,11 @@ jobs:
           for capabilities and supported options. Apply retirals,
           capability corrections, and additions directly to the working
           tree, and follow each skill's own verification steps: update the
-          $current and $retired arrays in verify_models.php from the
-          model table you fetched, run both harnesses
-          (php .agents/skills/synchronize-mittwald-models/scripts/verify_class.php
-          and php .agents/skills/synchronize-mittwald-models/scripts/verify_models.php),
-          then "composer run analyse" and "composer run format". Note the
-          results in your PR.
+          CURRENT, RETIRED and UNIMPLEMENTED lists in
+          tests/includes/ModelCatalogue.php from the model table you
+          fetched, then run "composer run test", "composer run analyse" and
+          "composer run format". Note the results in your PR, including any
+          test the audit reports as incomplete.
 
           Remember that the README.md and readme.txt model lists are
           separate copies of the same information; a change to one needs
@@ -76,7 +75,10 @@ jobs:
           also backs your own mittwald AI Hosting model via opencode.json).
           After making any model metadata changes, also run "composer run
           test:integration" to confirm the changed or added models actually
-          work against the live API, and note the result in your PR.
+          work against the live API, and note the result in your PR. This is
+          the only check that catches a capability the endpoint does not
+          honour, so treat it as required rather than optional; if it skips
+          for want of a key, report the change as unverified.
 
           This is a non-interactive, unattended run: never stop to ask a
           clarifying question. If something is ambiguous or you are not

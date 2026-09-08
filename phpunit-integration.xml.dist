@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+    Integration test suite. Every test in it talks to the real mittwald AI
+    hosting API and needs a MITTWALD_AI_API_KEY environment variable; without
+    one, all tests skip themselves rather than fail.
+
+    Run with: composer run test:integration
+-->
+<phpunit
+    bootstrap="tests/bootstrap.php"
+    colors="true"
+    beStrictAboutTestsThatDoNotTestAnything="false"
+    failOnRisky="true"
+>
+    <testsuites>
+        <testsuite name="integration">
+            <directory>tests/integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <ini name="error_reporting" value="-1"/>
+    </php>
+</phpunit>

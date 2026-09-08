@@ -2,59 +2,82 @@
 
 Shared reference for the `add-model` and `synchronize-mittwald-models` skills.
 
-## The two harnesses
+## Run the test suites
 
-Both live in `scripts/` next to the `synchronize-mittwald-models` skill. Run
-both, from the repository root, after any change to `includes/`.
+Run these from the repository root after any change to `includes/`. Both need
+`composer install` to have been run: the SDK is a dev dependency, so
+`vendor/wordpress/php-ai-client/` is where the contracts come from.
 
 ```bash
-php .agents/skills/synchronize-mittwald-models/scripts/verify_class.php
-php .agents/skills/synchronize-mittwald-models/scripts/verify_models.php
+composer run test              # unit suite, offline
+composer run test:integration  # real API, needs MITTWALD_AI_API_KEY
 ```
 
-Both need `composer install` to have been run: the SDK is a dev dependency, so
-`vendor/wordpress/php-ai-client/` is what they load the contracts from.
+**Neither is optional after a model change.** The unit suite proves the plugin
+maps the model the way you intended; only the integration suite proves the
+endpoint agrees. Claiming a capability the model does not actually have —
+vision on a text-only model, say — passes every offline check and fails only
+against the API.
 
-### `verify_class.php`
+If no `MITTWALD_AI_API_KEY` is available, the integration suite skips itself
+rather than failing. That is a silent pass, not a green light: say so in the
+report instead of claiming the change was verified end to end.
 
-Loads every class in `includes/` through the composer autoloader and reports the
-SDK interfaces each satisfies, then exercises the provider's static factories.
-This is the only check that catches class declaration fatals — a redeclared
-property narrowing an inherited type, or an interface from a php-ai-client
-release newer than the one installed. Neither phpcs nor phpstan reliably
-catches those.
+`tests/README.md` documents the layout and the traps, including why reasoning
+models need generous `max_tokens`.
 
-### `verify_models.php`
+## Update the catalogue first
 
-Prints a model-to-capability matrix. It builds a synthetic `/v1/models`
-response and runs it through the real
-`MittwaldModelMetadataDirectory::parseResponseToModelMetadataList()`, then
-matches each result against `ModelRequirements::areMetBy()` — the same check the
-SDK uses when picking a model — so it cannot drift from the code. Every model is
-also pushed through `MittwaldAIProvider::createModel()`, because a capability
-the provider does not route is a runtime exception rather than a missing picker
-entry.
+`tests/includes/ModelCatalogue.php` holds the lineup by hand, in three lists:
 
-Only the `$current` and `$retired` arrays at the top are maintained by hand.
-**Update them from the verbatim mittwald model table before trusting a run** —
-that is what turns the script from a static check into an audit.
+- `CURRENT` — every model the documented table offers.
+- `RETIRED` — models the table no longer lists.
+- `UNIMPLEMENTED` — currently offered models the plugin deliberately exposes no
+  capability for, because the operation type has no model class yet.
 
-Reading the matrix:
+**Update these from the verbatim mittwald model table before running anything.**
+That is what turns the unit suite from a static check into an audit. Also bump
+the "Last synchronised" date in that file's docblock.
 
-- A `$current` model showing `(none)` is unrecognised by the switch. Either the
-  ID is misspelled, or that model's operation type is genuinely not implemented
-  yet. Both look identical here, so check the switch before concluding which.
-- A `$retired` model showing any capability means a stale `case` survived.
-- `vision` appearing on a model whose documented modalities are text-only means
-  it landed in the multimodal option bundle by mistake.
-- A model you did not touch changing its row means your edit moved a shared
-  option bundle rather than a single case.
-- The reachability list at the bottom flags a model class nothing routes to —
-  usually a capability removed from the switch without removing its class.
+## What the suites tell you
 
-The script exits non-zero when any line is flagged. Some flags are known and
-expected while an operation type is unimplemented; note them in the report
-rather than silencing them.
+`ModelCatalogueTest` is the audit. It builds a synthetic `/v1/models` response,
+runs it through the real
+`MittwaldModelMetadataDirectory::parseResponseToModelMetadataList()` and pushes
+each result through `MittwaldAIProvider::createModel()`, so it cannot drift from
+the code it checks.
+
+- A model in `CURRENT` with no capabilities, and not listed in `UNIMPLEMENTED`,
+  **fails**: either the ID is misspelled, or the operation type is genuinely not
+  implemented and belongs in `UNIMPLEMENTED`. Check the switch before deciding.
+- A model in `RETIRED` that still claims capabilities is reported **incomplete**,
+  naming the stale `case`. It does not fail: an account may still have access to
+  a model that has left the public table, so removing the case is a judgement
+  call. Note it in the report.
+- A `CURRENT` model that no longer reaches a model class **fails**, because a
+  capability the provider does not route is a runtime exception rather than a
+  missing picker entry.
+
+`MittwaldModelMetadataDirectoryTest` matches each model against
+`ModelRequirements::areMetBy()` — the same check the SDK uses when picking a
+model — so `vision` appearing on a model whose documented modalities are
+text-only means it landed in the multimodal option bundle by mistake. A model
+you did not touch changing its row means your edit moved a shared option bundle
+rather than a single case.
+
+`ModelSortOrderTest::test_current_lineup_is_presented_in_the_expected_order()`
+pins the order the picker shows. Adding a model changes it, so update the
+expected list in that test deliberately rather than reflexively.
+
+Class declaration problems — a class made abstract that the provider
+instantiates, an interface from a `php-ai-client` release newer than the one
+installed — are caught by `composer run analyse`, not by a dedicated test.
+PHPStan resolves those against the installed SDK. Running the suites loads every
+class in `includes/` as well, so a declaration fatal takes the run with it.
+
+`MittwaldAIProviderTest::test_shipped_model_classes_are_reachable_from_the_router()`
+flags a model class nothing routes to — usually a capability removed from the
+switch without removing its class.
 
 ## Standard checks
 
@@ -70,14 +93,14 @@ error as a regression rather than noise.
 
 ## End-to-end
 
-There is no test framework in this repo, so the final check is manual, against a
-WordPress install with the plugin and the [AI
-Experiments](https://github.com/WordPress/ai) plugin active:
+The integration suite covers what used to need a manual walkthrough: it drives
+chat, vision, OCR and speech against the real endpoint. Add a case there for any
+capability a change newly claims, rather than checking it by hand.
+
+A manual pass against a WordPress install is still worth doing when the change
+touches how models are presented rather than how they behave:
 
 1. Settings → AI Experiments (`/options-general.php?page=ai-experiments`),
    with a valid mittwald API key configured.
 2. Confirm the model appears in the picker, in the position
    `modelSortCallback()` predicts.
-3. Exercise the capability the change claims — a chat turn, an image attached to
-   a prompt for a vision claim, a tool call, a TTS request. Claiming a
-   capability the endpoint rejects surfaces only here.

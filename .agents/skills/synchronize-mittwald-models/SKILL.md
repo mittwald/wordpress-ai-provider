@@ -158,7 +158,9 @@ grep -n "php-ai-client\|wp-ai-client" composer.json
 ls vendor/wordpress/php-ai-client/src/Providers/Models/
 ```
 
-`verify_class.php` is what proves the declaration actually loads.
+`composer run analyse` catches this: PHPStan resolves the interface against the
+installed SDK and reports one that does not exist. Running either test suite
+proves it too, since both load every class in `includes/`.
 
 Type hints and `use` statements behave differently: they resolve lazily, at call
 time. Referencing a class from a newer version inside a method body is safe on
@@ -166,11 +168,23 @@ older versions as long as the method is never reached.
 
 ## Step 6: Verify
 
-Follow `references/verifying.md`: both harnesses in `scripts/`, then
-`composer run analyse` and `composer run format`, then the manual walkthrough in
-a WordPress install. Update the `$current` and `$retired` arrays in
-`verify_models.php` to the lineup you fetched in Step 1 before reading its
-matrix — that is what turns it from a static check into an audit.
+Follow `references/verifying.md`.
+
+Update `tests/includes/ModelCatalogue.php` to the lineup you fetched in Step 1
+first — its `CURRENT`, `RETIRED` and `UNIMPLEMENTED` lists, plus the
+"Last synchronised" date. That is what turns the suite from a static check into
+an audit.
+
+Then run both suites, `composer run analyse` and `composer run format`:
+
+```bash
+composer run test              # unit suite, offline
+composer run test:integration  # real API, needs MITTWALD_AI_API_KEY
+```
+
+Running the integration suite is not optional when models changed: only it
+proves the endpoint agrees with the capabilities the plugin now claims. Without
+an API key it skips itself — report that as unverified rather than as a pass.
 
 ## Step 7: Report
 

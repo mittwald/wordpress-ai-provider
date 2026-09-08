@@ -7,5 +7,13 @@
 # exclude built zip distributions
 /*.zip
 
+# exclude PHPUnit caches
+/.phpunit.cache/
+/.phpunit.result.cache
+
+# exclude local PHPUnit overrides
+/phpunit.xml
+/phpunit-integration.xml
+
 # exclude agent worktrees
 /.claude/worktrees/

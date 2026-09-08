@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+    Unit test suite. Runs offline against fake HTTP transports.
+
+    The configuration deliberately avoids elements that differ between PHPUnit 9
+    and PHPUnit 10+, so the same file works across the PHP 7.4 - 8.5 support
+    matrix (PHPUnit 9.6 on PHP 7.4, PHPUnit 12 on current PHP).
+-->
+<phpunit
+    bootstrap="tests/bootstrap.php"
+    colors="true"
+    defaultTestSuite="unit"
+    beStrictAboutTestsThatDoNotTestAnything="true"
+    failOnRisky="true"
+>
+    <testsuites>
+        <testsuite name="unit">
+            <directory>tests/unit</directory>
+        </testsuite>
+        <testsuite name="integration">
+            <directory>tests/integration</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <ini name="error_reporting" value="-1"/>
+    </php>
+</phpunit>
