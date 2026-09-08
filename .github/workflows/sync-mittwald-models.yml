@@ -1,0 +1,112 @@
+name: Synchronize mittwald models
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly, Monday 06:00 UTC.
+    - cron: "0 6 * * 1"
+
+jobs:
+  sync-models:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'mittwald/wordpress-ai-provider' }}
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.RELEASE_USER_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          tools: composer
+          coverage: none
+
+      - name: Install Dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install opencode
+        run: npm install -g opencode-ai
+
+      - name: Configure git identity
+        run: |
+          git config user.name "mittwald-machine[bot]"
+          git config user.email "opensource@mittwald.de"
+
+      - name: Create working branch
+        run: git checkout -B "sync-mittwald-models-$(date +%Y-%m-%d)"
+
+      - name: Run model synchronization
+        env:
+          MITTWALD_AI_API_KEY: ${{ secrets.MITTWALD_AI_API_KEY }}
+          GH_TOKEN: ${{ secrets.RELEASE_USER_TOKEN }}
+        run: |
+          PROMPT=$(cat <<'PROMPT_EOF'
+          Run the synchronize-mittwald-models skill against this repository
+          to audit the model metadata in
+          includes/MittwaldModelMetadataDirectory.php against what mittwald
+          AI Hosting currently offers. If it finds a specific new model that
+          should be routed through an already implemented capability, also
+          use the add-model skill to add it, following that skill's rules
+          for capabilities and supported options. Apply retirals,
+          capability corrections, and additions directly to the working
+          tree, and follow each skill's own verification steps: update the
+          $current and $retired arrays in verify_models.php from the
+          model table you fetched, run both harnesses
+          (php .agents/skills/synchronize-mittwald-models/scripts/verify_class.php
+          and php .agents/skills/synchronize-mittwald-models/scripts/verify_models.php),
+          then "composer run analyse" and "composer run format". Note the
+          results in your PR.
+
+          Remember that the README.md and readme.txt model lists are
+          separate copies of the same information; a change to one needs
+          the same change in the other.
+
+          The MITTWALD_AI_API_KEY environment variable is already set (it
+          also backs your own mittwald AI Hosting model via opencode.json).
+          After making any model metadata changes, also run "composer run
+          test:integration" to confirm the changed or added models actually
+          work against the live API, and note the result in your PR.
+
+          This is a non-interactive, unattended run: never stop to ask a
+          clarifying question. If something is ambiguous or you are not
+          confident enough to act on (e.g. whether a model absent from one
+          fetch of the table is retired vs. temporarily unlisted, or a
+          model whose capability would need a new model class plus routing
+          in MittwaldAIProvider::createModel() that this plugin does not
+          implement yet), leave it unchanged and flag it clearly in the PR
+          instead of guessing.
+
+          You are already on a dedicated branch
+          (sync-mittwald-models-<date>), checked out from an up-to-date
+          main, created for exactly this run. If, and only if, the audit
+          finds drift that you fix: commit the changes (git commit, with a
+          Conventional Commits message describing what changed), push the
+          branch with "git push -u origin HEAD --force" (force is safe —
+          this branch is owned solely by this workflow), and open a pull
+          request against main with the "gh" CLI (already authenticated via
+          GH_TOKEN), choosing a PR title and body that accurately summarize
+          what changed and why, and note any drift found but deliberately
+          left unfixed plus the verification and integration-test results
+          in the PR body. Do not
+          add a test plan section to the PR description. If a model was
+          removed, say in the PR body that sites already configured for it
+          need to pick a new model by hand. Never push to or open a PR
+          targeting anything other than main as the base.
+
+          If the audit finds the model metadata is already fully in sync
+          with no drift to fix, do not commit, push, or open a PR — just
+          say so.
+          PROMPT_EOF
+          )
+          opencode run --print-logs --thinking --auto "$PROMPT"

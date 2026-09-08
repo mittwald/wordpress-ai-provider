@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(composer run:*)"
+      "Bash(composer run:*)",
+      "Skill(add-model)",
+      "Skill(synchronize-mittwald-models)",
+      "Bash(php .agents/skills/synchronize-mittwald-models/scripts/verify_class.php)",
+      "Bash(php .agents/skills/synchronize-mittwald-models/scripts/verify_models.php)",
+      "WebFetch(domain:developer.mittwald.de)"
     ]
   }
 }

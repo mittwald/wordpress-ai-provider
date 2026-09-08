@@ -6,3 +6,6 @@
 
 # exclude built zip distributions
 /*.zip
+
+# exclude agent worktrees
+/.claude/worktrees/
