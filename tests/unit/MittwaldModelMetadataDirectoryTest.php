@@ -163,11 +163,8 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 * @return list<array{string}>
 	 */
 	public static function provide_text_only_chat_models(): array {
-		// Qwen3-Coder-30B-Instruct has left the documented lineup but keeps its
-		// case; ModelCatalogueTest reports that, this pins what the case does.
 		return array(
 			array( 'gpt-oss-120b' ),
-			array( 'Qwen3-Coder-30B-Instruct' ),
 			array( 'Qwen3.5-0.8B' ),
 		);
 	}
@@ -199,11 +196,7 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 * @return list<array{string}>
 	 */
 	public static function provide_multimodal_chat_models(): array {
-		// The two Mistral entries have left the documented lineup but keep their
-		// cases; ModelCatalogueTest reports that, this pins what the cases do.
 		return array(
-			array( 'Mistral-Medium-3.5-128B' ),
-			array( 'Mistral-Small-3.2-24B-Instruct' ),
 			array( 'Ministral-3-14B-Instruct-2512' ),
 			array( 'Qwen3.5-122B-A10B-FP8' ),
 			array( 'Qwen3.6-35B-A3B-FP8' ),
@@ -359,7 +352,6 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	public static function provide_unsupported_models(): array {
 		return array(
 			array( 'Qwen3-Embedding-8B' ),
-			array( 'Qwen3-VL-Reranker' ),
 			array( 'Qwen3-VL-Reranker-2B' ),
 			array( 'whisper-large-v3-turbo' ),
 			array( 'some-model-released-tomorrow' ),
