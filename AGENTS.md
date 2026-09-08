@@ -38,6 +38,24 @@ All source code lives in `includes/` under the `Mittwald\AiProvider\` namespace 
 
 The abstract base classes come from the `wordpress/wp-ai-client` SDK. Most logic is inherited; these classes override specific methods for mittwald-specific behavior.
 
+## Skills
+
+Two skills in `.agents/skills/` cover keeping the model lineup in sync with what
+mittwald AI Hosting offers:
+
+- `add-model` — make one specific documented model available.
+- `synchronize-mittwald-models` — audit the whole lineup against the upstream
+  model table and reconcile the drift.
+
+They share `references/model-touchpoints.md` (every place a model ID appears)
+and `references/verifying.md`, plus two harnesses that exercise the real
+provider code:
+
+```bash
+php .agents/skills/synchronize-mittwald-models/scripts/verify_class.php
+php .agents/skills/synchronize-mittwald-models/scripts/verify_models.php
+```
+
 ## Conventions
 
 - **PHP version:** 7.4 minimum, `declare(strict_types=1)` on all files
