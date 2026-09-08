@@ -112,27 +112,43 @@ final class ProviderAvailabilityTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * Every model the API offers is one the plugin has an entry for.
+	 * Reports models the API offers that the plugin has no entry for.
 	 *
-	 * A model with no capabilities is invisible to a site, so a new model
-	 * appearing upstream shows up here as a prompt to add it to the plugin.
+	 * A model with no capabilities is invisible to a site, so this is worth
+	 * surfacing. It is reported as incomplete rather than failed: mittwald
+	 * adding a model upstream is not a defect in this plugin, and it should not
+	 * turn the build red on somebody else's release.
+	 *
+	 * The one genuine failure here is the plugin knowing about nothing at all,
+	 * which means the catalogue in `MittwaldModelMetadataDirectory` has gone
+	 * stale wholesale.
 	 */
-	public function test_no_offered_model_is_left_without_capabilities(): void {
-		$without_capabilities = array();
+	public function test_offered_models_are_known_to_the_plugin(): void {
+		$known   = array();
+		$unknown = array();
 
 		foreach ( $this->available_models() as $metadata ) {
 			if ( array() === $metadata->getSupportedCapabilities() ) {
-				$without_capabilities[] = $metadata->getId();
+				$unknown[] = $metadata->getId();
+				continue;
 			}
+
+			$known[] = $metadata->getId();
 		}
 
-		$this->assertSame(
-			array(),
-			$without_capabilities,
-			'These models are offered by mittwald AI hosting but carry no capabilities in '
-			. 'MittwaldModelMetadataDirectory, so no site can use them: '
-			. implode( ', ', $without_capabilities )
+		$this->assertNotEmpty(
+			$known,
+			'The plugin recognises none of the models on offer; the catalogue in '
+			. 'MittwaldModelMetadataDirectory has gone stale entirely.'
 		);
+
+		if ( array() !== $unknown ) {
+			$this->markTestIncomplete(
+				'mittwald AI hosting offers models this plugin has no entry for, so no site can '
+				. 'use them yet. Give them capabilities in MittwaldModelMetadataDirectory and '
+				. 'route them in MittwaldAIProvider::createModel(): ' . implode( ', ', $unknown )
+			);
+		}
 	}
 
 	/**
