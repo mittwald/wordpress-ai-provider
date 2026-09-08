@@ -12,6 +12,7 @@ namespace Mittwald\AiProvider\Tests\Unit;
 use Mittwald\AiProvider\MittwaldModelMetadataDirectory;
 use Mittwald\AiProvider\MittwaldTextToSpeechConversionModel;
 use Mittwald\AiProvider\Tests\Includes\FakeHttpTransporter;
+use Mittwald\AiProvider\Tests\Includes\ModelCatalogue;
 use Mittwald\AiProvider\Tests\Includes\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use WordPress\AiClient\Messages\Enums\ModalityEnum;
@@ -162,6 +163,8 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 * @return list<array{string}>
 	 */
 	public static function provide_text_only_chat_models(): array {
+		// Qwen3-Coder-30B-Instruct has left the documented lineup but keeps its
+		// case; ModelCatalogueTest reports that, this pins what the case does.
 		return array(
 			array( 'gpt-oss-120b' ),
 			array( 'Qwen3-Coder-30B-Instruct' ),
@@ -196,6 +199,8 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 * @return list<array{string}>
 	 */
 	public static function provide_multimodal_chat_models(): array {
+		// The two Mistral entries have left the documented lineup but keep their
+		// cases; ModelCatalogueTest reports that, this pins what the cases do.
 		return array(
 			array( 'Mistral-Medium-3.5-128B' ),
 			array( 'Mistral-Small-3.2-24B-Instruct' ),
@@ -362,32 +367,6 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	}
 
 	/**
-	 * Every model the API reports survives into the directory.
-	 */
-	public function test_every_reported_model_is_present_in_the_directory(): void {
-		$model_ids = array(
-			'gpt-oss-120b',
-			'Qwen3.5-0.8B',
-			'Ministral-3-14B-Instruct-2512',
-			'Qwen3.5-122B-A10B-FP8',
-			'Qwen3.6-35B-A3B-FP8',
-			'Qwen3.8-27B-NVFP4',
-			'GLM-OCR',
-			'Qwen3-Embedding-8B',
-			'Qwen3-VL-Reranker-2B',
-			'whisper-large-v3-turbo',
-			'Qwen3-TTS-12Hz-1.7B-CustomVoice',
-		);
-
-		$resolved = $this->resolve_model_metadata( $model_ids );
-
-		$this->assertCount( count( $model_ids ), $resolved );
-		foreach ( $model_ids as $model_id ) {
-			$this->assertArrayHasKey( $model_id, $resolved );
-		}
-	}
-
-	/**
 	 * Capability profiles a caller can ask the SDK for resolve to the right models.
 	 *
 	 * This is the check that matters to a site: the SDK picks models by matching
@@ -404,7 +383,7 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 		ModelRequirements $requirements,
 		array $expected
 	): void {
-		$resolved = $this->resolve_model_metadata( self::documented_model_ids() );
+		$resolved = $this->resolve_model_metadata( ModelCatalogue::CURRENT );
 
 		$matching = array();
 		foreach ( $resolved as $model_id => $metadata ) {
@@ -498,30 +477,6 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 				new ModelRequirements( array( CapabilityEnum::embeddingGeneration() ), array() ),
 				array(),
 			),
-		);
-	}
-
-	/**
-	 * The model lineup documented for mittwald AI hosting.
-	 *
-	 * Keep this in sync with
-	 * https://developer.mittwald.de/docs/v2/platform/aihosting/models/.
-	 *
-	 * @return list<string>
-	 */
-	private static function documented_model_ids(): array {
-		return array(
-			'gpt-oss-120b',
-			'Qwen3.5-0.8B',
-			'Ministral-3-14B-Instruct-2512',
-			'Qwen3.5-122B-A10B-FP8',
-			'Qwen3.6-35B-A3B-FP8',
-			'Qwen3.8-27B-NVFP4',
-			'GLM-OCR',
-			'Qwen3-Embedding-8B',
-			'Qwen3-VL-Reranker-2B',
-			'whisper-large-v3-turbo',
-			'Qwen3-TTS-12Hz-1.7B-CustomVoice',
 		);
 	}
 

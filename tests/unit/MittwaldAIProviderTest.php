@@ -13,6 +13,7 @@ use Mittwald\AiProvider\MittwaldAIProvider;
 use Mittwald\AiProvider\MittwaldModelMetadataDirectory;
 use Mittwald\AiProvider\MittwaldTextGenerationModel;
 use Mittwald\AiProvider\MittwaldTextToSpeechConversionModel;
+use Mittwald\AiProvider\Tests\Includes\ModelCatalogue;
 use Mittwald\AiProvider\Tests\Includes\TestCase;
 use Mittwald\AiProvider\Tests\Includes\WordPressStubState;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -227,7 +228,7 @@ final class MittwaldAIProviderTest extends TestCase {
 	 */
 	public function test_shipped_model_classes_are_reachable_from_the_router(): void {
 		$reachable = array();
-		foreach ( $this->resolve_model_metadata( self::routable_model_ids() ) as $metadata ) {
+		foreach ( $this->resolve_model_metadata( ModelCatalogue::routable() ) as $metadata ) {
 			$reachable[ get_class( $this->create_model( $metadata ) ) ] = true;
 		}
 
@@ -247,24 +248,6 @@ final class MittwaldAIProviderTest extends TestCase {
 			'The image generation model is the only class no catalogued model routes to, '
 			. 'because mittwald AI hosting does not currently offer an image model. '
 			. 'Any other class in this list is dead code.'
-		);
-	}
-
-	/**
-	 * Model IDs that currently resolve to a model class.
-	 *
-	 * @return list<string>
-	 */
-	private static function routable_model_ids(): array {
-		return array(
-			'gpt-oss-120b',
-			'Qwen3.5-0.8B',
-			'Ministral-3-14B-Instruct-2512',
-			'Qwen3.5-122B-A10B-FP8',
-			'Qwen3.6-35B-A3B-FP8',
-			'Qwen3.8-27B-NVFP4',
-			'GLM-OCR',
-			'Qwen3-TTS-12Hz-1.7B-CustomVoice',
 		);
 	}
 

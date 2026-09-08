@@ -48,13 +48,14 @@ mittwald AI Hosting offers:
   model table and reconcile the drift.
 
 They share `references/model-touchpoints.md` (every place a model ID appears)
-and `references/verifying.md`, plus two harnesses that exercise the real
-provider code:
+and `references/verifying.md`.
 
-```bash
-php .agents/skills/synchronize-mittwald-models/scripts/verify_class.php
-php .agents/skills/synchronize-mittwald-models/scripts/verify_models.php
-```
+Verification runs through the test suites rather than standalone scripts. The
+documented lineup lives in `tests/includes/ModelCatalogue.php` — its `CURRENT`,
+`RETIRED` and `UNIMPLEMENTED` lists are the one place to edit when models change
+upstream, and `ModelCatalogueTest` audits the plugin against them. After any
+model change run both suites; only `test:integration` catches a capability the
+endpoint does not actually honour.
 
 ## Conventions
 

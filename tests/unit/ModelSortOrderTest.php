@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Mittwald\AiProvider\Tests\Unit;
 
+use Mittwald\AiProvider\Tests\Includes\ModelCatalogue;
 use Mittwald\AiProvider\Tests\Includes\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -119,21 +120,7 @@ final class ModelSortOrderTest extends TestCase {
 	 * callback or the catalogue shows up as a deliberate update here.
 	 */
 	public function test_current_lineup_is_presented_in_the_expected_order(): void {
-		$sorted = $this->sorted(
-			array(
-				'GLM-OCR',
-				'Ministral-3-14B-Instruct-2512',
-				'Qwen3-Embedding-8B',
-				'Qwen3-TTS-12Hz-1.7B-CustomVoice',
-				'Qwen3-VL-Reranker-2B',
-				'Qwen3.5-0.8B',
-				'Qwen3.5-122B-A10B-FP8',
-				'Qwen3.6-35B-A3B-FP8',
-				'Qwen3.8-27B-NVFP4',
-				'gpt-oss-120b',
-				'whisper-large-v3-turbo',
-			)
-		);
+		$sorted = $this->sorted( ModelCatalogue::CURRENT );
 
 		$this->assertSame(
 			array(

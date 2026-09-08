@@ -91,5 +91,10 @@ So for a removal:
   documented lineup and the code never disagree.
 - If nothing else offers what the removed model did, say so plainly in the
   report; a site owner has to re-pick a model by hand.
+- Take the model out of `ModelCatalogue::CURRENT` and add it to
+  `ModelCatalogue::RETIRED` in `tests/includes/ModelCatalogue.php`.
 - Check `createModel()` afterwards: removing the last model of a capability
-  leaves its model class unreachable. `verify_models.php` reports that.
+  leaves its model class unreachable.
+  `MittwaldAIProviderTest::test_shipped_model_classes_are_reachable_from_the_router()`
+  reports that, and `ModelCatalogueTest` reports a retired model whose `case`
+  survived.

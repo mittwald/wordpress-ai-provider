@@ -20,6 +20,12 @@ composer run test:integration  # real API calls, needs MITTWALD_AI_API_KEY
 | `integration/`      | Tests that talk to mittwald AI hosting for real.                     |
 | `fixtures/`         | Images the vision and OCR tests send to the API.                     |
 
+`tests/includes/ModelCatalogue.php` holds the documented mittwald model lineup —
+`CURRENT`, `RETIRED` and `UNIMPLEMENTED`. It is maintained by hand from the
+upstream model table and is the single place to edit when models change; the
+`add-model` and `synchronize-mittwald-models` skills point at it, and
+`ModelCatalogueTest` audits the plugin against it.
+
 ## Unit suite
 
 The unit suite runs without WordPress and without network access. The plugin is
