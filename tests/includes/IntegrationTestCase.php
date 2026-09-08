@@ -22,6 +22,7 @@ use WordPress\AiClient\Providers\ApiBasedImplementation\Contracts\ApiBasedModelI
 use WordPress\AiClient\Providers\Models\DTO\ModelConfig;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use WordPress\AiClient\Providers\ProviderRegistry;
+use WordPress\AiClient\Results\DTO\GenerativeAiResult;
 
 /**
  * Shared setup for tests that talk to the real mittwald AI hosting API.
@@ -204,6 +205,75 @@ abstract class IntegrationTestCase extends PhpUnitTestCase {
 		$this->assertInstanceOf( CachesDataInterface::class, $directory );
 
 		$directory->invalidateCaches();
+	}
+
+	/**
+	 * Returns the text of a result's first candidate.
+	 *
+	 * `GenerativeAiResult::toText()` throws a bare "No text content found in
+	 * first candidate" when a model answers without content, which is a hard
+	 * error to act on. Several models offered here interleave reasoning: they
+	 * spend completion tokens on a `reasoning_content` block, which the SDK
+	 * files under the thought channel, before emitting any content. A
+	 * `max_tokens` that is too low is therefore answered entirely in reasoning,
+	 * with `content: null`. This helper says so.
+	 *
+	 * @param GenerativeAiResult $result The result to read.
+	 */
+	protected function text_of( GenerativeAiResult $result ): string {
+		$candidate = $result->getCandidates()[0];
+
+		$content  = array();
+		$thoughts = 0;
+
+		foreach ( $candidate->getMessage()->getParts() as $part ) {
+			$text = $part->getText();
+			if ( null === $text ) {
+				continue;
+			}
+
+			if ( $part->getChannel()->isContent() ) {
+				$content[] = $text;
+				continue;
+			}
+
+			++$thoughts;
+		}
+
+		$this->assertNotEmpty(
+			$content,
+			sprintf(
+				'The model returned no content (finish reason: %s, thought parts: %d). '
+				. 'Reasoning models spend their completion budget on reasoning before emitting '
+				. 'content, so too small a max_tokens yields an answer that is all reasoning '
+				. 'and no content.',
+				(string) $candidate->getFinishReason(),
+				$thoughts
+			)
+		);
+
+		return implode( '', $content );
+	}
+
+	/**
+	 * Returns the text of a result's first candidate, or null if it has none.
+	 *
+	 * For tests where an empty answer is a legitimate model outcome rather than
+	 * a defect, and the test should skip rather than fail.
+	 *
+	 * @param GenerativeAiResult $result The result to read.
+	 */
+	protected function optional_text_of( GenerativeAiResult $result ): ?string {
+		$content = array();
+
+		foreach ( $result->getCandidates()[0]->getMessage()->getParts() as $part ) {
+			$text = $part->getText();
+			if ( null !== $text && $part->getChannel()->isContent() ) {
+				$content[] = $text;
+			}
+		}
+
+		return array() === $content ? null : implode( '', $content );
 	}
 
 	/**

@@ -94,3 +94,29 @@ Generative models are not deterministic. Where a test depends on the model
 choosing to do something rather than on the provider building a valid request —
 function calling, for instance — it skips rather than fails when the model
 answers differently.
+
+### Reasoning models and `max_tokens`
+
+Several models on offer, `gpt-oss-120b` and the Qwen3.5 vision models among
+them, answer with a `reasoning_content` block before they emit any content. The
+SDK files that block under the thought channel, and `max_tokens` covers both.
+A budget sized for the visible answer alone is therefore spent entirely on
+reasoning: the response comes back with `content: null` and
+`finish_reason: length`, and `GenerativeAiResult::toText()` throws a bare
+"No text content found in first candidate".
+
+Two things follow for tests here:
+
+- Any test that asserts on an answer's content needs real headroom — these use
+  1024 tokens for prompts whose answers are a few words. Use
+  `IntegrationTestCase::text_of()` rather than `toText()`; it fails with the
+  finish reason and the thought-part count instead of the SDK's opaque message.
+- A test measuring something a reasoning block interferes with should run
+  against a model that answers directly. `TextGenerationTest::DIRECT_ANSWER_MODELS`
+  lists those; the stop-sequence test uses it, because a stop sequence can match
+  inside the reasoning block and end the generation before any content appears.
+
+Writing a system instruction is worth a moment's thought too. An instruction
+that asks the model to state something untrue makes a poor probe: `gpt-oss-120b`
+reasons its way out of one, on the grounds that the system prompt outranks it,
+and answers correctly anyway. Steer the shape of the answer instead.

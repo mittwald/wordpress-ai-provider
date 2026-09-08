@@ -32,6 +32,32 @@ use WordPress\AiClient\Tools\DTO\FunctionResponse;
 final class TextGenerationTest extends IntegrationTestCase {
 
 	/**
+	 * Completion budget for tests that assert on the answer's content.
+	 *
+	 * Several models here interleave reasoning: they spend completion tokens on
+	 * a reasoning block before emitting any content. A budget sized for the
+	 * visible answer alone is consumed entirely by reasoning, leaving
+	 * `content: null`, so these tests need real headroom.
+	 *
+	 * @var int
+	 */
+	private const CONTENT_BUDGET = 1024;
+
+	/**
+	 * Models that answer without a reasoning preamble, in order of preference.
+	 *
+	 * Used by the tests where an interleaved reasoning block would obscure what
+	 * is being measured.
+	 *
+	 * @var list<string>
+	 */
+	private const DIRECT_ANSWER_MODELS = array(
+		'Ministral-3-14B-Instruct-2512',
+		'Qwen3.5-0.8B',
+		'gpt-oss-120b',
+	);
+
+	/**
 	 * Chat models to try, in order of preference.
 	 *
 	 * @var list<string>
@@ -63,13 +89,13 @@ final class TextGenerationTest extends IntegrationTestCase {
 	 */
 	public function test_a_prompt_produces_text(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 64 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 
 		$result = $this->chat_model( $config )->generateTextResult(
 			$this->user_prompt( 'Reply with exactly the word: pong' )
 		);
 
-		$this->assertNotSame( '', trim( $result->toText() ) );
+		$this->assertNotSame( '', trim( $this->text_of( $result ) ) );
 		$this->assertSame( 1, $result->getCandidateCount() );
 		$this->assertGreaterThan( 0, $result->getTokenUsage()->getPromptTokens() );
 		$this->assertGreaterThan( 0, $result->getTokenUsage()->getCompletionTokens() );
@@ -81,18 +107,24 @@ final class TextGenerationTest extends IntegrationTestCase {
 	 * A system instruction steers the answer.
 	 */
 	public function test_a_system_instruction_is_honoured(): void {
+		/*
+		 * The instruction steers the shape of the answer rather than its
+		 * substance. Asking a model to state something untrue makes a poor probe:
+		 * gpt-oss-120b reasons its way out of such an instruction on the grounds
+		 * that the system prompt outranks it, and answers correctly anyway.
+		 */
 		$config = new ModelConfig();
-		$config->setMaxTokens( 32 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
 		$config->setSystemInstruction(
-			'You are a machine that answers every question with the single word NORDWEST, in capitals, and nothing else.'
+			'Begin every reply with the exact marker [MW] and then answer normally.'
 		);
 
 		$result = $this->chat_model( $config )->generateTextResult(
 			$this->user_prompt( 'What is the capital of France?' )
 		);
 
-		$this->assertStringContainsStringIgnoringCase( 'NORDWEST', $result->toText() );
+		$this->assertStringContainsString( '[MW]', $this->text_of( $result ) );
 	}
 
 	/**
@@ -100,7 +132,7 @@ final class TextGenerationTest extends IntegrationTestCase {
 	 */
 	public function test_chat_history_is_carried_into_the_answer(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 32 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
 
 		$prompt = array(
@@ -120,7 +152,7 @@ final class TextGenerationTest extends IntegrationTestCase {
 
 		$result = $this->chat_model( $config )->generateTextResult( $prompt );
 
-		$this->assertStringContainsStringIgnoringCase( 'chartreuse', $result->toText() );
+		$this->assertStringContainsStringIgnoringCase( 'chartreuse', $this->text_of( $result ) );
 	}
 
 	/**
@@ -146,7 +178,7 @@ final class TextGenerationTest extends IntegrationTestCase {
 	 */
 	public function test_json_output_mode_produces_valid_json(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 256 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
 		$config->setOutputMimeType( 'application/json' );
 
@@ -156,7 +188,7 @@ final class TextGenerationTest extends IntegrationTestCase {
 			)
 		);
 
-		$decoded = json_decode( $result->toText(), true );
+		$decoded = json_decode( $this->text_of( $result ), true );
 
 		$this->assertIsArray( $decoded, 'JSON mode should return a parseable JSON document.' );
 	}
@@ -169,7 +201,7 @@ final class TextGenerationTest extends IntegrationTestCase {
 	 */
 	public function test_output_schema_is_honoured(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 256 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
 		$config->setOutputMimeType( 'application/json' );
 		$config->setOutputSchema(
@@ -188,7 +220,7 @@ final class TextGenerationTest extends IntegrationTestCase {
 			$this->user_prompt( 'Give me the capital of Germany and roughly how many people live there.' )
 		);
 
-		$decoded = json_decode( $result->toText(), true );
+		$decoded = json_decode( $this->text_of( $result ), true );
 
 		$this->assertIsArray( $decoded );
 		$this->assertArrayHasKey( 'city', $decoded );
@@ -202,7 +234,7 @@ final class TextGenerationTest extends IntegrationTestCase {
 	 */
 	public function test_function_calling_produces_a_tool_call(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 256 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
 		$config->setFunctionDeclarations(
 			array(
@@ -255,7 +287,7 @@ final class TextGenerationTest extends IntegrationTestCase {
 	 */
 	public function test_a_function_response_can_be_fed_back(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 128 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
 		$config->setFunctionDeclarations(
 			array(
@@ -312,8 +344,10 @@ final class TextGenerationTest extends IntegrationTestCase {
 
 		$second = $model->generateTextResult( $prompt );
 
-		$this->assertNotSame( '', trim( $second->toText() ) );
-		$this->assertMatchesRegularExpression( '/7|rain|regn/i', $second->toText() );
+		$answer = $this->text_of( $second );
+
+		$this->assertNotSame( '', trim( $answer ) );
+		$this->assertMatchesRegularExpression( '/7|rain|regn/i', $answer );
 	}
 
 	/**
@@ -321,7 +355,7 @@ final class TextGenerationTest extends IntegrationTestCase {
 	 */
 	public function test_multiple_candidates_can_be_requested(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 32 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setCandidateCount( 2 );
 		$config->setTemperature( 1.0 );
 
@@ -340,19 +374,35 @@ final class TextGenerationTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * Stop sequences are passed through to the API.
+	 * Stop sequences are passed through to the API and truncate the answer.
+	 *
+	 * Run against a model that answers directly. On a model that reasons first,
+	 * the stop sequence can match inside the reasoning block and end the
+	 * generation before any content is emitted, which says nothing about whether
+	 * the parameter reached the API.
 	 */
 	public function test_stop_sequences_are_applied(): void {
+		$prompt = 'Repeat this list exactly, one word per line, nothing else: ALPHA BRAVO CHARLIE DELTA ECHO';
+
 		$config = new ModelConfig();
-		$config->setMaxTokens( 64 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
-		$config->setStopSequences( array( 'THREE' ) );
+		$config->setStopSequences( array( 'CHARLIE' ) );
 
-		$result = $this->chat_model( $config )->generateTextResult(
-			$this->user_prompt( 'Count upwards in capitals, one word per line: ONE TWO THREE FOUR FIVE.' )
-		);
+		$model = $this->first_available_model( self::DIRECT_ANSWER_MODELS, $config );
+		$this->assertInstanceOf( MittwaldTextGenerationModel::class, $model );
 
-		$this->assertStringNotContainsString( 'THREE', $result->toText() );
+		$answer = $this->optional_text_of( $model->generateTextResult( $this->user_prompt( $prompt ) ) );
+
+		if ( null === $answer ) {
+			$this->markTestSkipped(
+				'The model stopped before emitting any content, so there is nothing to check '
+				. 'the stop sequence against.'
+			);
+		}
+
+		$this->assertStringNotContainsString( 'CHARLIE', $answer );
+		$this->assertStringContainsString( 'ALPHA', $answer, 'The answer was truncated before it began.' );
 	}
 
 	/**

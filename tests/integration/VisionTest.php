@@ -27,6 +27,16 @@ use WordPress\AiClient\Providers\Models\DTO\ModelConfig;
 final class VisionTest extends IntegrationTestCase {
 
 	/**
+	 * Completion budget for these tests.
+	 *
+	 * The preferred vision model reasons before answering, and a budget sized
+	 * for the visible answer alone is spent entirely on that reasoning.
+	 *
+	 * @var int
+	 */
+	private const CONTENT_BUDGET = 1024;
+
+	/**
 	 * Vision-capable models to try, in order of preference.
 	 *
 	 * @var list<string>
@@ -81,7 +91,7 @@ final class VisionTest extends IntegrationTestCase {
 	 */
 	public function test_a_vision_model_can_read_an_image(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 128 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
 
 		$model = $this->vision_model( $config );
@@ -93,13 +103,14 @@ final class VisionTest extends IntegrationTestCase {
 			)
 		);
 
-		$text = strtolower( $result->toText() );
+		$answer = $this->text_of( $result );
+		$text   = strtolower( $answer );
 
 		$this->assertNotSame( '', trim( $text ) );
 		$this->assertMatchesRegularExpression(
 			'/red|rot/',
 			$text,
-			'A vision model should notice that the circle is red. Got: ' . $result->toText()
+			'A vision model should notice that the circle is red. Got: ' . $answer
 		);
 	}
 
@@ -108,7 +119,7 @@ final class VisionTest extends IntegrationTestCase {
 	 */
 	public function test_a_vision_model_can_read_text_in_an_image(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 128 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
 
 		$model = $this->vision_model( $config );
@@ -117,7 +128,7 @@ final class VisionTest extends IntegrationTestCase {
 			$this->image_prompt( 'Transcribe the text in this image, verbatim.', 'ocr-sample.png' )
 		);
 
-		$this->assertStringContainsStringIgnoringCase( 'mittwald', $result->toText() );
+		$this->assertStringContainsStringIgnoringCase( 'mittwald', $this->text_of( $result ) );
 	}
 
 	/**
@@ -125,7 +136,7 @@ final class VisionTest extends IntegrationTestCase {
 	 */
 	public function test_an_image_can_be_used_within_a_conversation(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 128 );
+		$config->setMaxTokens( self::CONTENT_BUDGET );
 		$config->setTemperature( 0.0 );
 
 		$model = $this->vision_model( $config );
@@ -144,6 +155,6 @@ final class VisionTest extends IntegrationTestCase {
 
 		$result = $model->generateTextResult( $prompt );
 
-		$this->assertMatchesRegularExpression( '/red|rot/i', $result->toText() );
+		$this->assertMatchesRegularExpression( '/red|rot/i', $this->text_of( $result ) );
 	}
 }

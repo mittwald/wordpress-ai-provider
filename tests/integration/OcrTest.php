@@ -50,7 +50,7 @@ final class OcrTest extends IntegrationTestCase {
 	 */
 	public function test_ocr_model_transcribes_text_from_an_image(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 256 );
+		$config->setMaxTokens( 1024 );
 
 		$model = $this->ocr_model( $config );
 
@@ -71,7 +71,7 @@ final class OcrTest extends IntegrationTestCase {
 
 		$result = $model->generateTextResult( $prompt );
 
-		$text = $result->toText();
+		$text = $this->text_of( $result );
 
 		$this->assertNotSame( '', trim( $text ) );
 		$this->assertStringContainsStringIgnoringCase( 'mittwald', $text );
@@ -83,7 +83,7 @@ final class OcrTest extends IntegrationTestCase {
 	 */
 	public function test_ocr_results_carry_token_usage_and_model_metadata(): void {
 		$config = new ModelConfig();
-		$config->setMaxTokens( 128 );
+		$config->setMaxTokens( 1024 );
 
 		$model = $this->ocr_model( $config );
 
