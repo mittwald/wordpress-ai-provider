@@ -85,6 +85,7 @@ Coverage by model kind:
 | `OcrTest`                   | `GLM-OCR`, including its deliberately reduced option set.            |
 | `TextToSpeechTest`          | `audio/speech`: every advertised voice and container format.         |
 | `ImageGenerationTest`       | Image generation — skips while no image model is on offer.           |
+| `PromptBuilderTest`         | The same capabilities driven through `AiClient::prompt()`, the entry point a site uses. |
 
 Two checks watch for the catalogue drifting, and they are deliberately not
 equally loud:
@@ -103,6 +104,26 @@ equally loud:
   internally consistent rather than about upstream, so it is a real failure:
   an unreachable model class is dead code. `MittwaldImageGenerationModel` is the
   one known exception, and it is named explicitly.
+
+### Why `PromptBuilderTest` exists separately
+
+The other integration tests resolve a model themselves and call
+`generateTextResult()` on it. A site never does that; it goes through
+`AiClient::prompt()`. That path adds two steps worth covering.
+
+The first is discovery: the SDK picks a model by matching `ModelRequirements`
+against the metadata this plugin publishes. Discovery is sensitive to the model
+config in a way a direct call is not — requiring an option a model does not
+advertise removes it from the running. Setting `usingMaxTokens()` on a
+text-to-speech prompt makes the speech model undiscoverable, correctly, because
+a token limit means nothing for speech synthesis. So `PromptBuilderTest` applies
+a token budget only to the text prompts.
+
+The second is the interface gate. `PromptBuilder` checks `instanceof
+TextGenerationModelInterface` and its siblings before calling a model. A model
+class that stopped satisfying one would still answer a direct call — the methods
+are inherited from the SDK base class — and would silently vanish from every
+builder-driven path. Nothing else in either suite notices that.
 
 Generative models are not deterministic. Where a test depends on the model
 choosing to do something rather than on the provider building a valid request —
