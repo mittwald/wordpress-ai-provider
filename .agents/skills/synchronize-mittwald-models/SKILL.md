@@ -158,8 +158,9 @@ grep -n "php-ai-client\|wp-ai-client" composer.json
 ls vendor/wordpress/php-ai-client/src/Providers/Models/
 ```
 
-`ShippedClassesTest` is what proves the declaration actually loads: it reflects
-every class in `includes/` and asserts the SDK contracts each satisfies.
+`composer run analyse` catches this: PHPStan resolves the interface against the
+installed SDK and reports one that does not exist. Running either test suite
+proves it too, since both load every class in `includes/`.
 
 Type hints and `use` statements behave differently: they resolve lazily, at call
 time. Referencing a class from a newer version inside a method body is safe on

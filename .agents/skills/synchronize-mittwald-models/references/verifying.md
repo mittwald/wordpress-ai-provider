@@ -69,12 +69,11 @@ rather than a single case.
 pins the order the picker shows. Adding a model changes it, so update the
 expected list in that test deliberately rather than reflexively.
 
-`ShippedClassesTest` loads every class in `includes/` and asserts the SDK
-contracts each satisfies. This is what catches a class declaration fatal — a
-redeclared property narrowing an inherited type, or an interface from a
-`php-ai-client` release newer than the one installed. A fatal there takes the
-whole run with it, which is the intended signal; neither phpcs nor phpstan
-catches those.
+Class declaration problems — a class made abstract that the provider
+instantiates, an interface from a `php-ai-client` release newer than the one
+installed — are caught by `composer run analyse`, not by a dedicated test.
+PHPStan resolves those against the installed SDK. Running the suites loads every
+class in `includes/` as well, so a declaration fatal takes the run with it.
 
 `MittwaldAIProviderTest::test_shipped_model_classes_are_reachable_from_the_router()`
 flags a model class nothing routes to — usually a capability removed from the
