@@ -41,9 +41,17 @@ capabilities and options the tests assert on cannot drift away from the ones the
 plugin ships.
 
 The suite runs on PHP 7.4 through 8.5. Data providers carry both the
-`@dataProvider` annotation (read by PHPUnit 9.6 on PHP 7.4) and the
-`#[DataProvider]` attribute (read by PHPUnit 10 and newer); on PHP 7.4 the
-attribute is parsed as a comment, so both forms are needed.
+`@dataProvider` annotation and the `#[DataProvider]` attribute: Composer pins
+the resolution platform to PHP 7.4 (`config.platform.php`) so that one lock file
+installs on every supported version, which means the locked PHPUnit is 9.6 and
+reads the annotation. The attribute keeps the suite working on PHPUnit 10 and
+newer, where annotations are deprecated. On PHP 7.4 the attribute is parsed as a
+comment, so carrying both is harmless.
+
+PHPStan analyses `includes/` and the plugin bootstrap, not `tests/`. Analysing
+test code needs `phpstan/phpstan-phpunit`, which requires a newer PHPStan than
+this project pins, and it cannot resolve the `#[DataProvider]` attributes against
+the locked PHPUnit 9.6 anyway. PHPCS does cover `tests/`.
 
 ## Integration suite
 
