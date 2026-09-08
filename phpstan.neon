@@ -4,3 +4,4 @@ parameters:
 	paths:
 		- includes
 		- mittwald-ai-provider.php
+		- tests

@@ -13,9 +13,17 @@ composer install              # Install dependencies
 composer run analyse          # Run PHPStan static analysis (level 10)
 composer run format           # Check code formatting (WordPress Coding Standards)
 composer run format:fix       # Auto-fix formatting issues
+composer run test             # Run the unit test suite (offline)
+composer run test:integration # Run integration tests against the real API
 ```
 
-No test framework is configured yet. CI runs `composer run analyse` across PHP 7.4–8.5.
+CI runs `composer run analyse` and `composer run test` across PHP 7.4–8.5.
+
+Tests live in `tests/`; see `tests/README.md` for the layout. The unit suite runs
+offline against a fake HTTP transport and a small set of WordPress function
+stubs — no WordPress installation needed. The integration suite talks to the
+real mittwald AI hosting API and needs a `MITTWALD_AI_API_KEY` environment
+variable; without one it skips itself rather than failing.
 
 ## Architecture
 
