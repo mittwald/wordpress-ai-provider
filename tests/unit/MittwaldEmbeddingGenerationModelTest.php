@@ -367,20 +367,35 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 	/**
 	 * A configured width is rejected by a model that does not advertise it.
 	 *
-	 * `Qwen3-Embedding-8B` emits fixed-width vectors, so its metadata omits the
-	 * option and the SDK's own resolution never hands one over. A directly
-	 * constructed model skips that check, and returning full-width vectors
-	 * anyway would misreport what was asked for.
+	 * The SDK's own model resolution matches on the same supported options, so
+	 * this is unreachable through `EmbeddingBuilder`. It is reached through the
+	 * named-model API — `ProviderRegistry::getProviderModel()` performs no
+	 * requirements matching — where returning a full-width vector would
+	 * misreport what was asked for.
 	 */
 	public function test_a_configured_dimension_is_rejected_when_unsupported(): void {
+		$metadata = new ModelMetadata(
+			'some-fixed-width-embedding-model',
+			'some-fixed-width-embedding-model',
+			array( CapabilityEnum::embeddingGeneration() ),
+			array(
+				new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
+				new SupportedOption( OptionEnum::customOptions() ),
+			)
+		);
+
 		$config = new ModelConfig();
 		$config->setDimensions( 256 );
+
+		$model = new MittwaldEmbeddingGenerationModel( $metadata, MittwaldAIProvider::metadata() );
+		$model->setConfig( $config );
+		$this->wire( $model, $this->transporter );
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'does not support the dimensions option' );
 
 		try {
-			$this->model( $config )->generateEmbeddingResult( $this->inputs( 'An important document' ) );
+			$model->generateEmbeddingResult( $this->inputs( 'An important document' ) );
 		} finally {
 			$this->assertSame( 0, $this->transporter->request_count() );
 		}
@@ -389,30 +404,14 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 	/**
 	 * A model that advertises the option forwards the configured width.
 	 *
-	 * Whether a width can be requested is a property of the individual model,
-	 * so the model class reads it from that model's own metadata. Nothing about
-	 * `Qwen3-Embedding-8B` is baked into the class: an embedding model whose
-	 * entry in `MittwaldModelMetadataDirectory` declares
-	 * `OptionEnum::dimensions()` sends the parameter through.
+	 * Whether a width can be requested is a property of the individual model, so
+	 * the model class reads it from that model's own metadata. `Qwen3-Embedding-8B`
+	 * declares the option, so the parameter goes out and the narrower vector
+	 * comes back.
 	 */
 	public function test_a_configured_dimension_is_forwarded_when_supported(): void {
-		$metadata = new ModelMetadata(
-			'some-projectable-embedding-model',
-			'some-projectable-embedding-model',
-			array( CapabilityEnum::embeddingGeneration() ),
-			array(
-				new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
-				new SupportedOption( OptionEnum::dimensions() ),
-				new SupportedOption( OptionEnum::customOptions() ),
-			)
-		);
-
 		$config = new ModelConfig();
 		$config->setDimensions( 4 );
-
-		$model = new MittwaldEmbeddingGenerationModel( $metadata, MittwaldAIProvider::metadata() );
-		$model->setConfig( $config );
-		$this->wire( $model, $this->transporter );
 
 		$this->queue_embeddings(
 			array(
@@ -423,7 +422,7 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 			)
 		);
 
-		$result = $model->generateEmbeddingResult( $this->inputs( 'An important document' ) );
+		$result = $this->model( $config )->generateEmbeddingResult( $this->inputs( 'An important document' ) );
 
 		$this->assertSame( 4, $this->transporter->last_request_payload()['dimensions'] );
 		$this->assertSame( 4, $result->getDimensions() );

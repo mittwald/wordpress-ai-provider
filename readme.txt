@@ -42,13 +42,15 @@ Fully supported for conversational AI, content generation, and chat-based intera
 
 **Capabilities:**
 - Text to vector, one embedding per input
-- 4096-dimensional vectors, up to 32,768 tokens of context per input
+- 4096-dimensional vectors by default, up to 32,768 tokens of context per input
+- A narrower vector on request, via the `dimensions` option
 - Several inputs per request; embeddings are returned in input order
 
-The vector width is fixed. The model does not support the `dimensions`
-parameter, so a request that asks for a narrower vector finds no suitable model
-rather than silently receiving a full-width one; truncate and re-normalise
-client-side if you need fewer dimensions.
+A note on `dimensions`: the mittwald AI hosting documentation currently lists
+this parameter as unsupported for `Qwen3-Embedding-8B`. The endpoint honours it
+and returns a vector of the width you ask for, so the plugin offers it. A
+correction to the documentation has been reported. Until it lands, treat the
+option as working-but-undocumented and pin the width you depend on.
 
 Vector storage is out of scope for this plugin — it returns the vectors and
 never touches a database.
