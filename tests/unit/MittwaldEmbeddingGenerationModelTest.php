@@ -410,22 +410,109 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 	 * comes back.
 	 */
 	public function test_a_configured_dimension_is_forwarded_when_supported(): void {
+		$narrowed = 256;
+
 		$config = new ModelConfig();
-		$config->setDimensions( 4 );
+		$config->setDimensions( $narrowed );
 
 		$this->queue_embeddings(
 			array(
 				array(
 					'index'     => 0,
-					'embedding' => $this->vector( 4, 0.1 ),
+					'embedding' => $this->vector( $narrowed, 0.1 ),
 				),
 			)
 		);
 
 		$result = $this->model( $config )->generateEmbeddingResult( $this->inputs( 'An important document' ) );
 
-		$this->assertSame( 4, $this->transporter->last_request_payload()['dimensions'] );
-		$this->assertSame( 4, $result->getDimensions() );
+		$this->assertSame( $narrowed, $this->transporter->last_request_payload()['dimensions'] );
+		$this->assertSame( $narrowed, $result->getDimensions() );
+	}
+
+	/**
+	 * Every documented width is accepted and forwarded.
+	 *
+	 * @param int $width A width the model documentation lists.
+	 *
+	 * @dataProvider provide_documented_dimensions
+	 */
+	#[DataProvider( 'provide_documented_dimensions' )]
+	public function test_every_documented_width_is_forwarded( int $width ): void {
+		$config = new ModelConfig();
+		$config->setDimensions( $width );
+
+		$this->queue_embeddings(
+			array(
+				array(
+					'index'     => 0,
+					'embedding' => $this->vector( $width, 0.1 ),
+				),
+			)
+		);
+
+		$result = $this->model( $config )->generateEmbeddingResult( $this->inputs( 'An important document' ) );
+
+		$this->assertSame( $width, $this->transporter->last_request_payload()['dimensions'] );
+		$this->assertSame( $width, $result->getDimensions() );
+	}
+
+	/**
+	 * The widths the model documentation lists.
+	 *
+	 * @return list<array{int}>
+	 */
+	public static function provide_documented_dimensions(): array {
+		return array(
+			array( 256 ),
+			array( 512 ),
+			array( 768 ),
+			array( 1024 ),
+			array( 1536 ),
+			array( 2048 ),
+			array( 3072 ),
+			array( 4096 ),
+		);
+	}
+
+	/**
+	 * A width the model does not offer is rejected before a request is made.
+	 *
+	 * The documented set is discrete, with 256 as the floor because retrieval
+	 * quality degrades beneath it. Model resolution filters on the same values,
+	 * so this is reached through the named-model API, which does no matching.
+	 *
+	 * @param int $width A width outside the documented set.
+	 *
+	 * @dataProvider provide_undocumented_dimensions
+	 */
+	#[DataProvider( 'provide_undocumented_dimensions' )]
+	public function test_an_undocumented_width_is_rejected( int $width ): void {
+		$config = new ModelConfig();
+		$config->setDimensions( $width );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'does not produce vectors of ' . $width . ' dimensions' );
+
+		try {
+			$this->model( $config )->generateEmbeddingResult( $this->inputs( 'An important document' ) );
+		} finally {
+			$this->assertSame( 0, $this->transporter->request_count() );
+		}
+	}
+
+	/**
+	 * Widths outside the documented set.
+	 *
+	 * @return list<array{int}>
+	 */
+	public static function provide_undocumented_dimensions(): array {
+		return array(
+			array( 128 ),
+			array( 300 ),
+			array( 1000 ),
+			array( 8192 ),
+		);
 	}
 
 	/**

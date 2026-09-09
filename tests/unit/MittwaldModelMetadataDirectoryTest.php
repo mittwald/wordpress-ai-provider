@@ -385,23 +385,92 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	}
 
 	/**
-	 * An embedding request that asks for a specific width resolves to the model.
-	 *
-	 * The endpoint projects to a narrower vector on request, so the model
-	 * advertises the option and stays discoverable for such a request.
+	 * The embedding model advertises exactly the widths its documentation lists.
 	 */
-	public function test_an_embedding_request_with_dimensions_resolves_to_the_embedding_model(): void {
-		$config = new ModelConfig();
-		$config->setDimensions( 256 );
-
-		$requirements = ModelRequirements::fromEmbeddingData(
-			array( new MessagePart( 'An important document' ) ),
-			$config
-		);
+	public function test_embedding_model_advertises_the_documented_widths(): void {
+		$metadata = $this->model_metadata( 'Qwen3-Embedding-8B' );
 
 		$this->assertSame(
+			array( 256, 512, 768, 1024, 1536, 2048, 3072, 4096 ),
+			$this->supported_option_values( $metadata, OptionEnum::dimensions() )
+		);
+	}
+
+	/**
+	 * A request for a documented width resolves to the embedding model.
+	 *
+	 * @param int $width A width the model documentation lists.
+	 *
+	 * @dataProvider provide_documented_dimensions
+	 */
+	#[DataProvider( 'provide_documented_dimensions' )]
+	public function test_an_embedding_request_with_a_documented_width_resolves_to_the_model( int $width ): void {
+		$this->assertSame(
 			array( 'Qwen3-Embedding-8B' ),
-			$this->models_matching( $requirements )
+			$this->models_matching( $this->embedding_requirements( $width ) )
+		);
+	}
+
+	/**
+	 * A request for an undocumented width resolves to nothing.
+	 *
+	 * The widths form a discrete set, so declaring the values as well as the
+	 * option is what keeps an unlisted width out of the picker. Reporting "no
+	 * suitable model" beats reaching the API and failing there.
+	 *
+	 * @param int $width A width outside the documented set.
+	 *
+	 * @dataProvider provide_undocumented_dimensions
+	 */
+	#[DataProvider( 'provide_undocumented_dimensions' )]
+	public function test_an_embedding_request_with_an_undocumented_width_resolves_to_nothing( int $width ): void {
+		$this->assertSame( array(), $this->models_matching( $this->embedding_requirements( $width ) ) );
+	}
+
+	/**
+	 * The widths the model documentation lists.
+	 *
+	 * @return list<array{int}>
+	 */
+	public static function provide_documented_dimensions(): array {
+		return array(
+			array( 256 ),
+			array( 512 ),
+			array( 768 ),
+			array( 1024 ),
+			array( 1536 ),
+			array( 2048 ),
+			array( 3072 ),
+			array( 4096 ),
+		);
+	}
+
+	/**
+	 * Widths outside the documented set, including one below the 256 floor.
+	 *
+	 * @return list<array{int}>
+	 */
+	public static function provide_undocumented_dimensions(): array {
+		return array(
+			array( 128 ),
+			array( 300 ),
+			array( 1000 ),
+			array( 8192 ),
+		);
+	}
+
+	/**
+	 * Builds embedding requirements for a single text input of the given width.
+	 *
+	 * @param int $width The vector width to ask for.
+	 */
+	private function embedding_requirements( int $width ): ModelRequirements {
+		$config = new ModelConfig();
+		$config->setDimensions( $width );
+
+		return ModelRequirements::fromEmbeddingData(
+			array( new MessagePart( 'An important document' ) ),
+			$config
 		);
 	}
 
