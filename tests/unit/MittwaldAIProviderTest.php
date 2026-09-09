@@ -55,7 +55,7 @@ final class MittwaldAIProviderTest extends TestCase {
 
 		$this->assertNotNull( $logo_path, 'The provider should expose the bundled icon.' );
 		$this->assertFileExists( $logo_path );
-		$this->assertSame( 'icon.svg', basename( $logo_path ) );
+		$this->assertSame( 'icon-256x256.png', basename( $logo_path ) );
 	}
 
 	/**
