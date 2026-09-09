@@ -64,7 +64,7 @@ class MittwaldAIProvider extends AbstractApiProvider {
 	protected static function createProviderMetadata(): ProviderMetadata {
 		$langUrlPart    = str_starts_with( get_user_locale(), 'de' ) ? 'de/' : '';
 		$credentialsUrl = 'https://developer.mittwald.de/' . $langUrlPart . 'docs/v2/platform/aihosting/access-and-usage/access/';
-		$logoPath       = realpath( dirname( __DIR__ ) . '/assets/icon.svg' );
+		$logoPath       = realpath( dirname( __DIR__ ) . '/assets/icon-256x256.png' );
 		if ( ! $logoPath ) {
 			$logoPath = null;
 		}
