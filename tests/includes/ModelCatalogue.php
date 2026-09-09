@@ -18,7 +18,7 @@ namespace Mittwald\AiProvider\Tests\Includes;
  *
  * https://developer.mittwald.de/docs/v2/platform/aihosting/models/
  *
- * Last synchronised: 2026-09-08. Re-fetch the table before trusting a run.
+ * Last synchronised: 2026-09-09. Re-fetch the table before trusting a run.
  *
  * @see \Mittwald\AiProvider\Tests\Unit\ModelCatalogueTest
  */
@@ -61,14 +61,13 @@ final class ModelCatalogue {
 	/**
 	 * Currently offered models the plugin deliberately exposes no capability for.
 	 *
-	 * These are operation types the plugin does not implement yet — embeddings,
-	 * reranking and speech-to-text. They are listed so the audit can tell a
-	 * known gap apart from a model that was simply forgotten.
+	 * These are operation types the plugin does not implement yet — reranking
+	 * and speech-to-text. They are listed so the audit can tell a known gap
+	 * apart from a model that was simply forgotten.
 	 *
 	 * @var list<string>
 	 */
 	public const UNIMPLEMENTED = array(
-		'Qwen3-Embedding-8B',
 		'Qwen3-VL-Reranker-2B',
 		'whisper-large-v3-turbo',
 	);

@@ -118,6 +118,21 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 			new SupportedOption( OptionEnum::customOptions() ),
 		);
 
+		$embeddingCapabilities = array(
+			CapabilityEnum::embeddingGeneration(),
+		);
+
+		/*
+		 * Deliberately without `OptionEnum::dimensions()`: the documented lineup's embedding model
+		 * emits vectors of a fixed width and rejects the `dimensions` parameter. Leaving the option
+		 * undeclared makes a caller asking for a narrower vector find no suitable model, rather than
+		 * receive full-width vectors that quietly ignore the request.
+		 */
+		$embeddingOptions = array(
+			new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
+			new SupportedOption( OptionEnum::customOptions() ),
+		);
+
 		$modelsData = (array) $responseData['data'];
 
 		$models = array_values(
@@ -129,7 +144,9 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 					$gptOcrCapabilities,
 					$gptOcrOptions,
 					$ttsCapabilities,
-					$ttsOptions
+					$ttsOptions,
+					$embeddingCapabilities,
+					$embeddingOptions
 				): ModelMetadata {
 					$modelId = $modelData['id'];
 					switch ( $modelId ) {
@@ -152,6 +169,10 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 						case 'Qwen3-TTS-12Hz-1.7B-CustomVoice':
 							$modelCaps    = $ttsCapabilities;
 							$modelOptions = $ttsOptions;
+							break;
+						case 'Qwen3-Embedding-8B':
+							$modelCaps    = $embeddingCapabilities;
+							$modelOptions = $embeddingOptions;
 							break;
 						case 'Qwen3-VL-Reranker-2B':
 							$modelCaps    = array();

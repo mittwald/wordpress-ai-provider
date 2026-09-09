@@ -35,6 +35,24 @@ Fully supported for conversational AI, content generation, and chat-based intera
 - Tool/function calling
 - Streaming responses
 
+= Embeddings =
+
+**Available Models:**
+- **Qwen Embedding**: `Qwen3-Embedding-8B`
+
+**Capabilities:**
+- Text to vector, one embedding per input
+- 4096-dimensional vectors, up to 32,768 tokens of context per input
+- Several inputs per request; embeddings are returned in input order
+
+The vector width is fixed. The model does not support the `dimensions`
+parameter, so a request that asks for a narrower vector finds no suitable model
+rather than silently receiving a full-width one; truncate and re-normalise
+client-side if you need fewer dimensions.
+
+Vector storage is out of scope for this plugin — it returns the vectors and
+never touches a database.
+
 = Text to Speech =
 
 **Available Models:**

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Mittwald\AiProvider\Tests\Unit;
 
 use Mittwald\AiProvider\MittwaldAIProvider;
+use Mittwald\AiProvider\MittwaldEmbeddingGenerationModel;
 use Mittwald\AiProvider\MittwaldModelMetadataDirectory;
 use Mittwald\AiProvider\MittwaldTextGenerationModel;
 use Mittwald\AiProvider\MittwaldTextToSpeechConversionModel;
@@ -23,7 +24,6 @@ use WordPress\AiClient\Providers\DTO\ProviderMetadata;
 use WordPress\AiClient\Providers\Http\Enums\RequestAuthenticationMethod;
 use WordPress\AiClient\Providers\Models\Contracts\ModelInterface;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
-use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
 
 /**
  * Covers provider metadata, URL construction and model routing.
@@ -200,24 +200,16 @@ final class MittwaldAIProviderTest extends TestCase {
 		$this->expectException( RuntimeException::class );
 		$this->expectExceptionMessage( 'Unsupported model capabilities' );
 
-		$this->create_model( $this->model_metadata( 'Qwen3-Embedding-8B' ) );
+		$this->create_model( $this->model_metadata( 'whisper-large-v3-turbo' ) );
 	}
 
 	/**
-	 * Embedding models are recognised, but not yet implemented.
+	 * The embedding model is routed to the embedding generation model class.
 	 */
-	public function test_embedding_models_report_that_they_are_not_implemented(): void {
-		$metadata = new ModelMetadata(
-			'some-embedding-model',
-			'some-embedding-model',
-			array( CapabilityEnum::embeddingGeneration() ),
-			array()
-		);
+	public function test_embedding_model_is_routed_to_the_embedding_model(): void {
+		$model = $this->create_model( $this->model_metadata( 'Qwen3-Embedding-8B' ) );
 
-		$this->expectException( RuntimeException::class );
-		$this->expectExceptionMessage( 'not yet implemented' );
-
-		$this->create_model( $metadata );
+		$this->assertInstanceOf( MittwaldEmbeddingGenerationModel::class, $model );
 	}
 
 	/**
