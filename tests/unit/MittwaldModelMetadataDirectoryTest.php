@@ -349,9 +349,9 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	/**
 	 * The embedding model exposes only the options it actually accepts.
 	 *
-	 * `dimensions` is the one that matters: the model emits vectors of a fixed
-	 * width and rejects the parameter, so advertising it would let a caller ask
-	 * for a narrower vector and receive a full-width one instead.
+	 * `dimensions` is included on the strength of the endpoint's behaviour: it
+	 * answers a request carrying the parameter with a vector of the requested
+	 * width, which the AI hosting documentation currently denies.
 	 */
 	public function test_embedding_model_exposes_a_reduced_option_set(): void {
 		$metadata = $this->model_metadata( 'Qwen3-Embedding-8B' );
@@ -359,6 +359,7 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 		$this->assertSame(
 			array(
 				OptionEnum::inputModalities()->value,
+				OptionEnum::dimensions()->value,
 				OptionEnum::customOptions()->value,
 			),
 			$this->supported_option_names( $metadata )
@@ -384,13 +385,12 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	}
 
 	/**
-	 * An embedding request that asks for a specific width resolves to nothing.
+	 * An embedding request that asks for a specific width resolves to the model.
 	 *
-	 * Reporting "no suitable model" is the intended outcome: no model on offer
-	 * can project to a narrower vector, and answering with a full-width one
-	 * would silently ignore what the caller asked for.
+	 * The endpoint projects to a narrower vector on request, so the model
+	 * advertises the option and stays discoverable for such a request.
 	 */
-	public function test_an_embedding_request_with_dimensions_resolves_to_nothing(): void {
+	public function test_an_embedding_request_with_dimensions_resolves_to_the_embedding_model(): void {
 		$config = new ModelConfig();
 		$config->setDimensions( 256 );
 
@@ -399,7 +399,10 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 			$config
 		);
 
-		$this->assertSame( array(), $this->models_matching( $requirements ) );
+		$this->assertSame(
+			array( 'Qwen3-Embedding-8B' ),
+			$this->models_matching( $requirements )
+		);
 	}
 
 	/**

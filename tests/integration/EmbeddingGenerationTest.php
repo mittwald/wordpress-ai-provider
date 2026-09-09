@@ -188,17 +188,37 @@ final class EmbeddingGenerationTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * Asking for a narrower vector finds no model rather than a wider one.
+	 * A requested vector width is honoured by the endpoint.
 	 *
-	 * The model emits vectors of a fixed width and rejects the `dimensions`
-	 * parameter, so the plugin does not advertise the option. Reporting "no
-	 * suitable model" is the intended outcome; answering with a 4096-wide
-	 * vector would silently ignore what the caller asked for.
+	 * The AI hosting documentation states that `dimensions` is unsupported for
+	 * this model and that the width is fixed at 4096. The endpoint disagrees,
+	 * and this is the test that holds it to the observed behaviour: if a
+	 * deployment ever starts ignoring the parameter, the plugin advertises a
+	 * capability it no longer has, and this fails.
 	 */
-	public function test_a_narrower_vector_is_not_on_offer(): void {
-		$this->assertFalse(
+	public function test_a_requested_vector_width_is_honoured(): void {
+		$narrowed = 256;
+
+		$embeddings = $this->builder( 'An important document' )
+			->usingDimensions( $narrowed )
+			->generateEmbeddings();
+
+		$this->assertCount( 1, $embeddings );
+		$this->assertCount( $narrowed, $embeddings[0]->getValues() );
+		$this->assertSame( $narrowed, $embeddings[0]->getDimensions() );
+	}
+
+	/**
+	 * A request carrying a width still discovers the model.
+	 *
+	 * Discovery matches on advertised options, so omitting `dimensions` from
+	 * the metadata would remove the model from the running for this request
+	 * without any error being raised.
+	 */
+	public function test_a_request_carrying_a_width_is_still_supported(): void {
+		$this->assertTrue(
 			$this->builder( 'An important document' )->usingDimensions( 256 )->isSupported(),
-			'No model on offer can project to a narrower vector, so none should match.'
+			'The embedding model advertises the dimensions option, so it should match.'
 		);
 	}
 

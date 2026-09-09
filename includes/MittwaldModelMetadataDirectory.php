@@ -123,17 +123,23 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 		);
 
 		/*
-		 * Deliberately without `OptionEnum::dimensions()`: the documented lineup's embedding model
-		 * emits vectors of a fixed width and rejects the `dimensions` parameter. Leaving the option
-		 * undeclared makes a caller asking for a narrower vector find no suitable model. Declaring it
-		 * would hand back full-width vectors that quietly ignore the requested width.
+		 * `OptionEnum::dimensions()` is declared without a value list, so any width a caller asks for
+		 * is passed on to the API to accept or reject.
+		 *
+		 * Note that the AI hosting documentation contradicts this. Both the model page and the
+		 * supported-endpoints page state that `dimensions` is unsupported for `Qwen3-Embedding-8B`
+		 * and that its width is fixed at 4096. The endpoint answers a request carrying the parameter
+		 * with 200 and a vector of exactly the requested width, so the documentation is behind the
+		 * implementation; a correction has been reported. Declaring the option follows the observed
+		 * behaviour, which is what a caller can actually use.
 		 *
 		 * This is the per-model switch for that parameter. `MittwaldEmbeddingGenerationModel` reads
-		 * the option back off the metadata, so an embedding model added here that does support
-		 * projection forwards the configured width without any change to the model class.
+		 * the option back off the metadata, so an embedding model added here without it rejects a
+		 * configured width instead of quietly returning a full-width vector.
 		 */
 		$embeddingOptions = array(
 			new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
+			new SupportedOption( OptionEnum::dimensions() ),
 			new SupportedOption( OptionEnum::customOptions() ),
 		);
 
