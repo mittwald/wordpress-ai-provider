@@ -55,6 +55,7 @@ final class ModelCatalogue {
 		'Mistral-Small-3.2-24B-Instruct',
 		'Mistral-Medium-3.5-128B',
 		'Qwen3-Coder-30B-Instruct',
+		'Qwen3-VL-Reranker',
 	);
 
 	/**

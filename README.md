@@ -78,7 +78,7 @@ Fully supported for conversational AI, content generation, and chat-based intera
 
 - **Capabilities:**
 - Standard text chat
-- Image vision (Mistral Small and Qwen models)
+- Image vision (Ministral and Qwen models)
 - JSON output formatting
 - Tool/function calling
 - Streaming responses
