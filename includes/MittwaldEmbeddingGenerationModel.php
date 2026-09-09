@@ -13,6 +13,7 @@ use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\Http\Exception\ResponseException;
 use WordPress\AiClient\Providers\Http\Util\ResponseUtil;
 use WordPress\AiClient\Providers\Models\EmbeddingGeneration\Contracts\EmbeddingGenerationModelInterface;
+use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
 use WordPress\AiClient\Results\DTO\Embedding;
 use WordPress\AiClient\Results\DTO\EmbeddingResult;
 use WordPress\AiClient\Results\DTO\TokenUsage;
@@ -30,6 +31,7 @@ use WordPress\AiClient\Results\DTO\TokenUsage;
  *     model: string,
  *     input: list<string>,
  *     encoding_format: string,
+ *     dimensions?: int,
  *     ...
  * }
  */
@@ -86,26 +88,36 @@ class MittwaldEmbeddingGenerationModel extends AbstractApiBasedModel implements
 	protected function prepareGenerateEmbeddingParams( array $inputs ): array {
 		$config = $this->getConfig();
 
-		/*
-		 * The model does not advertise the `dimensions` option, so the SDK's model resolution rejects a
-		 * configured dimension before it ever gets here. A directly constructed model skips that check,
-		 * and silently returning full-width vectors would misreport what the caller asked for.
-		 */
-		if ( null !== $config->getDimensions() ) {
-			throw new InvalidArgumentException(
-				sprintf(
-					'The model "%s" produces vectors of a fixed width and does not support the '
-					. 'dimensions option. Truncate and re-normalise the vectors instead.',
-					esc_html( $this->metadata()->getId() )
-				)
-			);
-		}
-
 		$params = array(
 			'model'           => $this->metadata()->getId(),
 			'input'           => $this->prepareInputParam( $inputs ),
 			'encoding_format' => self::ENCODING_FORMAT,
 		);
+
+		/*
+		 * Whether a model can project to a narrower vector is a property of that model, so the answer
+		 * comes from its own metadata. A model whose entry in `MittwaldModelMetadataDirectory` declares
+		 * the option forwards the configured width to the API; one that does not, rejects it.
+		 *
+		 * For a model resolved through the SDK the rejection is unreachable, because model resolution
+		 * already matches on the same supported options. It is reached when a model is constructed
+		 * directly, which skips that check — and returning full-width vectors there would misreport
+		 * what the caller asked for.
+		 */
+		$dimensions = $config->getDimensions();
+		if ( null !== $dimensions ) {
+			if ( ! $this->supportsOption( OptionEnum::dimensions() ) ) {
+				throw new InvalidArgumentException(
+					sprintf(
+						'The model "%s" produces vectors of a fixed width and does not support the '
+						. 'dimensions option. Truncate and re-normalise the vectors instead.',
+						esc_html( $this->metadata()->getId() )
+					)
+				);
+			}
+
+			$params['dimensions'] = $dimensions;
+		}
 
 		/*
 		 * Any custom options are added to the parameters as well.
@@ -171,6 +183,25 @@ class MittwaldEmbeddingGenerationModel extends AbstractApiBasedModel implements
 		}
 
 		return $texts;
+	}
+
+	/**
+	 * Reports whether this model's metadata advertises the given option.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param OptionEnum $option The option to look for.
+	 *
+	 * @return bool True if the model advertises the option.
+	 */
+	protected function supportsOption( OptionEnum $option ): bool {
+		foreach ( $this->metadata()->getSupportedOptions() as $supportedOption ) {
+			if ( $supportedOption->getName()->equals( $option ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

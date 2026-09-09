@@ -125,8 +125,12 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 		/*
 		 * Deliberately without `OptionEnum::dimensions()`: the documented lineup's embedding model
 		 * emits vectors of a fixed width and rejects the `dimensions` parameter. Leaving the option
-		 * undeclared makes a caller asking for a narrower vector find no suitable model, rather than
-		 * receive full-width vectors that quietly ignore the request.
+		 * undeclared makes a caller asking for a narrower vector find no suitable model. Declaring it
+		 * would hand back full-width vectors that quietly ignore the requested width.
+		 *
+		 * This is the per-model switch for that parameter. `MittwaldEmbeddingGenerationModel` reads
+		 * the option back off the metadata, so an embedding model added here that does support
+		 * projection forwards the configured width without any change to the model class.
 		 */
 		$embeddingOptions = array(
 			new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),

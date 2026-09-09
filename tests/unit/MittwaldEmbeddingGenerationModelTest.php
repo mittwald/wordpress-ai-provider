@@ -21,7 +21,12 @@ use WordPress\AiClient\Providers\Http\DTO\RequestOptions;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\Http\Exception\ClientException;
 use WordPress\AiClient\Providers\Http\Exception\ResponseException;
+use WordPress\AiClient\Messages\Enums\ModalityEnum;
 use WordPress\AiClient\Providers\Models\DTO\ModelConfig;
+use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
+use WordPress\AiClient\Providers\Models\DTO\SupportedOption;
+use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
+use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
 
 /**
  * Covers the `embeddings` implementation the plugin writes by hand.
@@ -360,13 +365,14 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 	}
 
 	/**
-	 * A configured vector width is rejected rather than silently ignored.
+	 * A configured width is rejected by a model that does not advertise it.
 	 *
-	 * The model advertises no `dimensions` option, so the SDK's own resolution
-	 * never hands one over. A directly constructed model skips that check, and
-	 * returning full-width vectors anyway would misreport what was asked for.
+	 * `Qwen3-Embedding-8B` emits fixed-width vectors, so its metadata omits the
+	 * option and the SDK's own resolution never hands one over. A directly
+	 * constructed model skips that check, and returning full-width vectors
+	 * anyway would misreport what was asked for.
 	 */
-	public function test_a_configured_dimension_is_rejected(): void {
+	public function test_a_configured_dimension_is_rejected_when_unsupported(): void {
 		$config = new ModelConfig();
 		$config->setDimensions( 256 );
 
@@ -378,6 +384,49 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 		} finally {
 			$this->assertSame( 0, $this->transporter->request_count() );
 		}
+	}
+
+	/**
+	 * A model that advertises the option forwards the configured width.
+	 *
+	 * Whether a width can be requested is a property of the individual model,
+	 * so the model class reads it from that model's own metadata. Nothing about
+	 * `Qwen3-Embedding-8B` is baked into the class: an embedding model whose
+	 * entry in `MittwaldModelMetadataDirectory` declares
+	 * `OptionEnum::dimensions()` sends the parameter through.
+	 */
+	public function test_a_configured_dimension_is_forwarded_when_supported(): void {
+		$metadata = new ModelMetadata(
+			'some-projectable-embedding-model',
+			'some-projectable-embedding-model',
+			array( CapabilityEnum::embeddingGeneration() ),
+			array(
+				new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
+				new SupportedOption( OptionEnum::dimensions() ),
+				new SupportedOption( OptionEnum::customOptions() ),
+			)
+		);
+
+		$config = new ModelConfig();
+		$config->setDimensions( 4 );
+
+		$model = new MittwaldEmbeddingGenerationModel( $metadata, MittwaldAIProvider::metadata() );
+		$model->setConfig( $config );
+		$this->wire( $model, $this->transporter );
+
+		$this->queue_embeddings(
+			array(
+				array(
+					'index'     => 0,
+					'embedding' => $this->vector( 4, 0.1 ),
+				),
+			)
+		);
+
+		$result = $model->generateEmbeddingResult( $this->inputs( 'An important document' ) );
+
+		$this->assertSame( 4, $this->transporter->last_request_payload()['dimensions'] );
+		$this->assertSame( 4, $result->getDimensions() );
 	}
 
 	/**

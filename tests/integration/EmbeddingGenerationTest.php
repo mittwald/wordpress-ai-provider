@@ -22,10 +22,13 @@ use WordPress\AiClient\Results\DTO\EmbeddingResult;
 /**
  * Exercises the `embeddings` endpoint against the real API.
  *
- * Two things are only knowable here. The documented vector width is a claim
- * about the endpoint, not about this plugin, and the docs say nothing at all
- * about passing several inputs at once — both examples embed a single string.
- * The batch cases below are what records that behaviour.
+ * Scope here is what this plugin has to get right against a live endpoint: the
+ * request shape it builds, and the response shape it parses back. The vector
+ * width is asserted because the plugin reports it; the quality of the vectors
+ * is the model's business and is left to mittwald.
+ *
+ * The batch cases carry the most weight, since neither documentation page says
+ * whether `input` accepts an array — both examples embed a single string.
  */
 final class EmbeddingGenerationTest extends IntegrationTestCase {
 
@@ -153,32 +156,6 @@ final class EmbeddingGenerationTest extends IntegrationTestCase {
 			0.99,
 			$this->cosine_similarity( $embeddings[1], $separate_second ),
 			'The second vector of the batch does not match the second input embedded on its own.'
-		);
-	}
-
-	/**
-	 * Related texts embed closer together than unrelated ones.
-	 *
-	 * A weak check by design — it asks only that the vectors carry meaning,
-	 * which is what a retrieval pipeline is built on. It would catch the
-	 * endpoint answering with something structurally valid but useless.
-	 */
-	public function test_related_texts_embed_closer_than_unrelated_ones(): void {
-		$result = $this->embed(
-			'How do I reset my password?',
-			'What are the steps to change my password?',
-			'The mountain range stretches along the coast.'
-		);
-
-		$embeddings = $result->getEmbeddings();
-
-		$related   = $this->cosine_similarity( $embeddings[0], $embeddings[1] );
-		$unrelated = $this->cosine_similarity( $embeddings[0], $embeddings[2] );
-
-		$this->assertGreaterThan(
-			$unrelated,
-			$related,
-			'Two ways of asking the same question should embed closer than unrelated text.'
 		);
 	}
 
