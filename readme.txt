@@ -35,6 +35,26 @@ Fully supported for conversational AI, content generation, and chat-based intera
 - Tool/function calling
 - Streaming responses
 
+= Embeddings =
+
+**Available Models:**
+- **Qwen Embedding**: `Qwen3-Embedding-8B`
+
+**Capabilities:**
+- Text to vector, one embedding per input
+- 4096-dimensional vectors by default, up to 32,768 tokens of context per input
+- A narrower vector on request, via the `dimensions` option
+- Several inputs per request; embeddings are returned in input order
+
+The `dimensions` option accepts 256, 512, 768, 1024, 1536, 2048, 3072 and 4096.
+Asking for anything else reports no suitable model, since 256 is the documented
+floor — retrieval quality degrades below it. The endpoint L2-normalises a
+projected vector, so you can use it directly for dot-product similarity without
+normalising it yourself.
+
+Vector storage is out of scope for this plugin — it returns the vectors and
+never touches a database.
+
 = Text to Speech =
 
 **Available Models:**

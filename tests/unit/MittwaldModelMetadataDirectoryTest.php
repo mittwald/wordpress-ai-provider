@@ -15,12 +15,14 @@ use Mittwald\AiProvider\Tests\Includes\FakeHttpTransporter;
 use Mittwald\AiProvider\Tests\Includes\ModelCatalogue;
 use Mittwald\AiProvider\Tests\Includes\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use WordPress\AiClient\Messages\DTO\MessagePart;
 use WordPress\AiClient\Messages\Enums\ModalityEnum;
 use WordPress\AiClient\Providers\Http\DTO\ApiKeyRequestAuthentication;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\Http\Exception\ClientException;
 use WordPress\AiClient\Providers\Http\Exception\ResponseException;
 use WordPress\AiClient\Providers\Http\Exception\ServerException;
+use WordPress\AiClient\Providers\Models\DTO\ModelConfig;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use WordPress\AiClient\Providers\Models\DTO\ModelRequirements;
 use WordPress\AiClient\Providers\Models\DTO\RequiredOption;
@@ -327,6 +329,152 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	}
 
 	/**
+	 * The embedding model turns text into vectors and offers nothing else.
+	 */
+	public function test_embedding_model_is_text_to_vector(): void {
+		$metadata = $this->model_metadata( 'Qwen3-Embedding-8B' );
+
+		$this->assertHasCapabilities( $metadata, array( CapabilityEnum::embeddingGeneration() ) );
+		$this->assertNotContains(
+			CapabilityEnum::chatHistory()->value,
+			$this->capability_values( $metadata ),
+			'Qwen3-Embedding-8B does not support chat interaction and must not advertise it.'
+		);
+		$this->assertSame(
+			array( array( 'text' ) ),
+			$this->supported_option_values( $metadata, OptionEnum::inputModalities() )
+		);
+	}
+
+	/**
+	 * The embedding model exposes only the options it actually accepts.
+	 *
+	 * `dimensions` is included on the strength of the endpoint's behaviour: it
+	 * answers a request carrying the parameter with a vector of the requested
+	 * width, which the AI hosting documentation currently denies.
+	 */
+	public function test_embedding_model_exposes_a_reduced_option_set(): void {
+		$metadata = $this->model_metadata( 'Qwen3-Embedding-8B' );
+
+		$this->assertSame(
+			array(
+				OptionEnum::inputModalities()->value,
+				OptionEnum::dimensions()->value,
+				OptionEnum::customOptions()->value,
+			),
+			$this->supported_option_names( $metadata )
+		);
+	}
+
+	/**
+	 * A text embedding request resolves to the embedding model.
+	 *
+	 * Built through `ModelRequirements::fromEmbeddingData()`, which is what
+	 * `EmbeddingBuilder` uses, so this is the path a site actually takes.
+	 */
+	public function test_an_embedding_request_resolves_to_the_embedding_model(): void {
+		$requirements = ModelRequirements::fromEmbeddingData(
+			array( new MessagePart( 'An important document' ) ),
+			new ModelConfig()
+		);
+
+		$this->assertSame(
+			array( 'Qwen3-Embedding-8B' ),
+			$this->models_matching( $requirements )
+		);
+	}
+
+	/**
+	 * The embedding model advertises exactly the widths its documentation lists.
+	 */
+	public function test_embedding_model_advertises_the_documented_widths(): void {
+		$metadata = $this->model_metadata( 'Qwen3-Embedding-8B' );
+
+		$this->assertSame(
+			array( 256, 512, 768, 1024, 1536, 2048, 3072, 4096 ),
+			$this->supported_option_values( $metadata, OptionEnum::dimensions() )
+		);
+	}
+
+	/**
+	 * A request for a documented width resolves to the embedding model.
+	 *
+	 * @param int $width A width the model documentation lists.
+	 *
+	 * @dataProvider provide_documented_dimensions
+	 */
+	#[DataProvider( 'provide_documented_dimensions' )]
+	public function test_an_embedding_request_with_a_documented_width_resolves_to_the_model( int $width ): void {
+		$this->assertSame(
+			array( 'Qwen3-Embedding-8B' ),
+			$this->models_matching( $this->embedding_requirements( $width ) )
+		);
+	}
+
+	/**
+	 * A request for an undocumented width resolves to nothing.
+	 *
+	 * The widths form a discrete set, so declaring the values as well as the
+	 * option is what keeps an unlisted width out of the picker. Reporting "no
+	 * suitable model" beats reaching the API and failing there.
+	 *
+	 * @param int $width A width outside the documented set.
+	 *
+	 * @dataProvider provide_undocumented_dimensions
+	 */
+	#[DataProvider( 'provide_undocumented_dimensions' )]
+	public function test_an_embedding_request_with_an_undocumented_width_resolves_to_nothing( int $width ): void {
+		$this->assertSame( array(), $this->models_matching( $this->embedding_requirements( $width ) ) );
+	}
+
+	/**
+	 * The widths the model documentation lists.
+	 *
+	 * @return list<array{int}>
+	 */
+	public static function provide_documented_dimensions(): array {
+		return array(
+			array( 256 ),
+			array( 512 ),
+			array( 768 ),
+			array( 1024 ),
+			array( 1536 ),
+			array( 2048 ),
+			array( 3072 ),
+			array( 4096 ),
+		);
+	}
+
+	/**
+	 * Widths outside the documented set, including one below the 256 floor.
+	 *
+	 * @return list<array{int}>
+	 */
+	public static function provide_undocumented_dimensions(): array {
+		return array(
+			array( 128 ),
+			array( 300 ),
+			array( 1000 ),
+			array( 8192 ),
+		);
+	}
+
+	/**
+	 * Builds embedding requirements for a single text input of the given width.
+	 *
+	 * @param int $width The vector width to ask for.
+	 */
+	private function embedding_requirements( int $width ): ModelRequirements {
+		$config = new ModelConfig();
+		$config->setDimensions( $width );
+
+		return ModelRequirements::fromEmbeddingData(
+			array( new MessagePart( 'An important document' ) ),
+			$config
+		);
+	}
+
+	/**
 	 * Models the plugin does not know about are listed without capabilities.
 	 *
 	 * They still need to appear in the directory: dropping them would make
@@ -351,7 +499,6 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 */
 	public static function provide_unsupported_models(): array {
 		return array(
-			array( 'Qwen3-Embedding-8B' ),
 			array( 'Qwen3-VL-Reranker-2B' ),
 			array( 'whisper-large-v3-turbo' ),
 			array( 'some-model-released-tomorrow' ),
@@ -375,19 +522,31 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 		ModelRequirements $requirements,
 		array $expected
 	): void {
-		$resolved = $this->resolve_model_metadata( ModelCatalogue::CURRENT );
-
-		$matching = array();
-		foreach ( $resolved as $model_id => $metadata ) {
-			if ( $requirements->areMetBy( $metadata ) ) {
-				$matching[] = $model_id;
-			}
-		}
+		$matching = $this->models_matching( $requirements );
 
 		sort( $matching );
 		sort( $expected );
 
 		$this->assertSame( $expected, $matching );
+	}
+
+	/**
+	 * Returns the documented models that satisfy the given requirements.
+	 *
+	 * @param ModelRequirements $requirements Requirements to match.
+	 *
+	 * @return list<string>
+	 */
+	private function models_matching( ModelRequirements $requirements ): array {
+		$matching = array();
+
+		foreach ( $this->resolve_model_metadata( ModelCatalogue::CURRENT ) as $model_id => $metadata ) {
+			if ( $requirements->areMetBy( $metadata ) ) {
+				$matching[] = $model_id;
+			}
+		}
+
+		return $matching;
 	}
 
 	/**
@@ -467,7 +626,7 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 			),
 			'embedding' => array(
 				new ModelRequirements( array( CapabilityEnum::embeddingGeneration() ), array() ),
-				array(),
+				array( 'Qwen3-Embedding-8B' ),
 			),
 		);
 	}
