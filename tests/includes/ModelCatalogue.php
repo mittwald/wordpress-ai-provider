@@ -62,14 +62,13 @@ final class ModelCatalogue {
 	/**
 	 * Currently offered models the plugin deliberately exposes no capability for.
 	 *
-	 * These are operation types the plugin does not implement yet — embeddings,
-	 * reranking and speech-to-text. They are listed so the audit can tell a
-	 * known gap apart from a model that was simply forgotten.
+	 * These are operation types the plugin does not implement yet — reranking
+	 * and speech-to-text. They are listed so the audit can tell a known gap
+	 * apart from a model that was simply forgotten.
 	 *
 	 * @var list<string>
 	 */
 	public const UNIMPLEMENTED = array(
-		'Qwen3-Embedding-8B',
 		'Qwen3-VL-Reranker-2B',
 		'whisper-large-v3-turbo',
 		'cohere-transcribe-03-2026',

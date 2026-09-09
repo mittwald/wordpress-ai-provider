@@ -112,6 +112,21 @@ final class ProviderAvailabilityTest extends IntegrationTestCase {
 	}
 
 	/**
+	 * At least one model can generate embeddings.
+	 */
+	public function test_an_embedding_capable_model_is_on_offer(): void {
+		$requirements = new ModelRequirements(
+			array( CapabilityEnum::embeddingGeneration() ),
+			array()
+		);
+
+		$this->assertNotEmpty(
+			$this->models_matching( $requirements ),
+			'No model on offer supports embedding generation.'
+		);
+	}
+
+	/**
 	 * Reports models the API offers that the plugin has no entry for.
 	 *
 	 * A model with no capabilities is invisible to a site, so this is worth

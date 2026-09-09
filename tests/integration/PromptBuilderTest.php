@@ -117,8 +117,8 @@ final class PromptBuilderTest extends IntegrationTestCase {
 			'mittwald AI hosting offers no image model, so the builder should say so.'
 		);
 		$this->assertFalse(
-			$builder->isSupported( CapabilityEnum::embeddingGeneration() ),
-			'The plugin implements no embedding model, so the builder should say so.'
+			$builder->isSupported( CapabilityEnum::videoGeneration() ),
+			'mittwald AI hosting offers no video model, so the builder should say so.'
 		);
 	}
 

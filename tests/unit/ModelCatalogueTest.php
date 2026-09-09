@@ -50,9 +50,9 @@ final class ModelCatalogueTest extends TestCase {
 	 * Documented models the plugin exposes no capability for are reported.
 	 *
 	 * A model with no capabilities is invisible in the picker. Some of those
-	 * are known gaps — embeddings, reranking and speech-to-text have no model
-	 * class yet — and those are listed in the catalogue so they can be told
-	 * apart from a model that was simply missed.
+	 * are known gaps — reranking and speech-to-text have no model class yet —
+	 * and those are listed in the catalogue so they can be told apart from a
+	 * model that was simply missed.
 	 */
 	public function test_documented_models_without_capabilities_are_known_gaps(): void {
 		$unexpected = array();
