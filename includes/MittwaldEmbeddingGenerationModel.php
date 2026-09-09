@@ -12,6 +12,7 @@ use WordPress\AiClient\Providers\Http\DTO\Response;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\Http\Exception\ResponseException;
 use WordPress\AiClient\Providers\Http\Util\ResponseUtil;
+use WordPress\AiClient\Providers\Models\DTO\SupportedOption;
 use WordPress\AiClient\Providers\Models\EmbeddingGeneration\Contracts\EmbeddingGenerationModelInterface;
 use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
 use WordPress\AiClient\Results\DTO\Embedding;
@@ -95,23 +96,38 @@ class MittwaldEmbeddingGenerationModel extends AbstractApiBasedModel implements
 		);
 
 		/*
-		 * Whether a model can project to a narrower vector is a property of that model, so the answer
-		 * comes from its own metadata. A model whose entry in `MittwaldModelMetadataDirectory` declares
-		 * the option forwards the configured width to the API; one that does not, rejects it.
+		 * Whether a model can project to a narrower vector, and which widths it takes, are properties
+		 * of that model, so both answers come from its own metadata. A model whose entry in
+		 * `MittwaldModelMetadataDirectory` declares the option and the requested width forwards it;
+		 * anything else is refused here.
 		 *
-		 * For a model resolved through the SDK the rejection is unreachable, because model resolution
-		 * already matches on the same supported options. It is reached when a model is constructed
-		 * directly, which skips that check — and returning full-width vectors there would misreport
-		 * what the caller asked for.
+		 * Model resolution matches on the same supported options, so this is unreachable through
+		 * `EmbeddingBuilder`. It is reached through the named-model API, which performs no
+		 * requirements matching, and where a vector of the wrong width would misreport what the
+		 * caller asked for.
 		 */
 		$dimensions = $config->getDimensions();
 		if ( null !== $dimensions ) {
-			if ( ! $this->supportsOption( OptionEnum::dimensions() ) ) {
+			$supportedOption = $this->supportedOption( OptionEnum::dimensions() );
+
+			if ( null === $supportedOption ) {
 				throw new InvalidArgumentException(
 					sprintf(
 						'The model "%s" produces vectors of a fixed width and does not support the '
 						. 'dimensions option. Truncate and re-normalise the vectors instead.',
 						esc_html( $this->metadata()->getId() )
+					)
+				);
+			}
+
+			if ( ! $supportedOption->isSupportedValue( $dimensions ) ) {
+				throw new InvalidArgumentException(
+					sprintf(
+						'The model "%s" does not produce vectors of %s dimensions. Supported widths '
+						. 'are: %s.',
+						esc_html( $this->metadata()->getId() ),
+						esc_html( (string) $dimensions ),
+						esc_html( $this->describeSupportedValues( $supportedOption ) )
 					)
 				);
 			}
@@ -186,22 +202,48 @@ class MittwaldEmbeddingGenerationModel extends AbstractApiBasedModel implements
 	}
 
 	/**
-	 * Reports whether this model's metadata advertises the given option.
+	 * Renders an option's supported values as a human-readable list.
+	 *
+	 * Used for error messages, so a caller is told which values would have worked.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param SupportedOption $option The option to describe.
+	 *
+	 * @return string The supported values, comma separated.
+	 */
+	protected function describeSupportedValues( SupportedOption $option ): string {
+		$rendered = array();
+
+		foreach ( $option->getSupportedValues() ?? array() as $value ) {
+			if ( is_scalar( $value ) ) {
+				$rendered[] = (string) $value;
+			}
+		}
+
+		return implode( ', ', $rendered );
+	}
+
+	/**
+	 * Returns this model's declaration of the given option, if it advertises one.
+	 *
+	 * The declaration carries the values the model accepts as well as the option itself, so callers
+	 * can check a specific value against it.
 	 *
 	 * @since 1.3.0
 	 *
 	 * @param OptionEnum $option The option to look for.
 	 *
-	 * @return bool True if the model advertises the option.
+	 * @return SupportedOption|null The model's declaration, or null if it advertises none.
 	 */
-	protected function supportsOption( OptionEnum $option ): bool {
+	protected function supportedOption( OptionEnum $option ): ?SupportedOption {
 		foreach ( $this->metadata()->getSupportedOptions() as $supportedOption ) {
 			if ( $supportedOption->getName()->equals( $option ) ) {
-				return true;
+				return $supportedOption;
 			}
 		}
 
-		return false;
+		return null;
 	}
 
 	/**

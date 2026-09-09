@@ -11,6 +11,7 @@ namespace Mittwald\AiProvider\Tests\Integration;
 
 use Mittwald\AiProvider\MittwaldAIProvider;
 use Mittwald\AiProvider\Tests\Includes\IntegrationTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use WordPress\AiClient\AiClient;
 use WordPress\AiClient\Builders\EmbeddingBuilder;
 use WordPress\AiClient\Messages\DTO\MessagePart;
@@ -188,24 +189,64 @@ final class EmbeddingGenerationTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * A requested vector width is honoured by the endpoint.
+	 * Every documented vector width is honoured by the endpoint.
 	 *
-	 * The AI hosting documentation states that `dimensions` is unsupported for
-	 * this model and that the width is fixed at 4096. The endpoint disagrees,
-	 * and this is the test that holds it to the observed behaviour: if a
-	 * deployment ever starts ignoring the parameter, the plugin advertises a
-	 * capability it no longer has, and this fails.
+	 * The model documentation lists a discrete set of widths, and the plugin
+	 * advertises exactly that set. This holds the endpoint to it: a width that
+	 * stops being served turns into a capability the plugin claims and cannot
+	 * deliver, and this is the only check that would notice.
+	 *
+	 * @param int $width A width the model documentation lists.
+	 *
+	 * @dataProvider provide_documented_dimensions
 	 */
-	public function test_a_requested_vector_width_is_honoured(): void {
-		$narrowed = 256;
-
+	#[DataProvider( 'provide_documented_dimensions' )]
+	public function test_a_requested_vector_width_is_honoured( int $width ): void {
 		$embeddings = $this->builder( 'An important document' )
-			->usingDimensions( $narrowed )
+			->usingDimensions( $width )
 			->generateEmbeddings();
 
 		$this->assertCount( 1, $embeddings );
-		$this->assertCount( $narrowed, $embeddings[0]->getValues() );
-		$this->assertSame( $narrowed, $embeddings[0]->getDimensions() );
+		$this->assertCount( $width, $embeddings[0]->getValues() );
+		$this->assertSame( $width, $embeddings[0]->getDimensions() );
+	}
+
+	/**
+	 * The widths the model documentation lists.
+	 *
+	 * @return list<array{int}>
+	 */
+	public static function provide_documented_dimensions(): array {
+		return array(
+			array( 256 ),
+			array( 512 ),
+			array( 768 ),
+			array( 1024 ),
+			array( 1536 ),
+			array( 2048 ),
+			array( 3072 ),
+			array( 4096 ),
+		);
+	}
+
+	/**
+	 * A projected vector comes back L2-normalised.
+	 *
+	 * The documentation states the endpoint normalises after reducing, which is
+	 * what lets a caller use the vector directly for dot-product similarity. A
+	 * deployment that skipped the step would leave that silently wrong.
+	 */
+	public function test_a_projected_vector_is_l2_normalised(): void {
+		$embedding = $this->builder( 'An important document' )
+			->usingDimensions( 256 )
+			->generateEmbedding();
+
+		$norm = 0.0;
+		foreach ( $embedding->getValues() as $value ) {
+			$norm += (float) $value ** 2;
+		}
+
+		$this->assertEqualsWithDelta( 1.0, sqrt( $norm ), 0.01, 'A projected vector should be L2-normalised.' );
 	}
 
 	/**

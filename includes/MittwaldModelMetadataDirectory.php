@@ -123,23 +123,26 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 		);
 
 		/*
-		 * `OptionEnum::dimensions()` is declared without a value list, so any width a caller asks for
-		 * is passed on to the API to accept or reject.
+		 * `Qwen3-Embedding-8B` projects to a narrower vector on request, and accepts only the widths
+		 * listed below; the documentation gives 256 as the floor, because retrieval quality degrades
+		 * beneath it. Declaring the values, and not just the option, is what makes a request for an
+		 * unlisted width report "no suitable model" instead of reaching the API and failing there.
 		 *
-		 * Note that the AI hosting documentation contradicts this. Both the model page and the
-		 * supported-endpoints page state that `dimensions` is unsupported for `Qwen3-Embedding-8B`
-		 * and that its width is fixed at 4096. The endpoint answers a request carrying the parameter
-		 * with 200 and a vector of exactly the requested width, so the documentation is behind the
-		 * implementation; a correction has been reported. Declaring the option follows the observed
-		 * behaviour, which is what a caller can actually use.
+		 * The endpoint L2-normalises the vector after reducing it, so callers need no follow-up
+		 * normalisation of their own.
 		 *
-		 * This is the per-model switch for that parameter. `MittwaldEmbeddingGenerationModel` reads
-		 * the option back off the metadata, so an embedding model added here without it rejects a
-		 * configured width instead of quietly returning a full-width vector.
+		 * This is the per-model switch for the parameter, which is where the supported-endpoints page
+		 * puts it too: support is a property of each model instead of the endpoint as a whole.
+		 * `MittwaldEmbeddingGenerationModel` reads the option back off the metadata, so an embedding
+		 * model added here without it rejects a configured width instead of quietly returning a
+		 * full-width vector.
 		 */
 		$embeddingOptions = array(
 			new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
-			new SupportedOption( OptionEnum::dimensions() ),
+			new SupportedOption(
+				OptionEnum::dimensions(),
+				array( 256, 512, 768, 1024, 1536, 2048, 3072, 4096 )
+			),
 			new SupportedOption( OptionEnum::customOptions() ),
 		);
 
