@@ -18,7 +18,7 @@ namespace Mittwald\AiProvider\Tests\Includes;
  *
  * https://developer.mittwald.de/docs/v2/platform/aihosting/models/
  *
- * Last synchronised: 2026-09-08. Re-fetch the table before trusting a run.
+ * Last synchronised: 2026-10-19. Re-fetch the table before trusting a run.
  *
  * @see \Mittwald\AiProvider\Tests\Unit\ModelCatalogueTest
  */
@@ -40,6 +40,7 @@ final class ModelCatalogue {
 		'Qwen3-Embedding-8B',
 		'Qwen3-VL-Reranker-2B',
 		'whisper-large-v3-turbo',
+		'cohere-transcribe-03-2026',
 		'Qwen3-TTS-12Hz-1.7B-CustomVoice',
 	);
 
@@ -71,6 +72,7 @@ final class ModelCatalogue {
 		'Qwen3-Embedding-8B',
 		'Qwen3-VL-Reranker-2B',
 		'whisper-large-v3-turbo',
+		'cohere-transcribe-03-2026',
 	);
 
 	/**
