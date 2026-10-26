@@ -354,6 +354,7 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 			array( 'Qwen3-Embedding-8B' ),
 			array( 'Qwen3-VL-Reranker-2B' ),
 			array( 'whisper-large-v3-turbo' ),
+			array( 'cohere-transcribe-03-2026' ),
 			array( 'some-model-released-tomorrow' ),
 		);
 	}
