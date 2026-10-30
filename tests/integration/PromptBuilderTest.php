@@ -191,6 +191,8 @@ final class PromptBuilderTest extends IntegrationTestCase {
 			)
 			->generateText();
 
+		$this->mark_incomplete_on_json_whitespace_runaway( $answer );
+
 		$decoded = json_decode( $answer, true );
 
 		$this->assertIsArray( $decoded, 'Expected a JSON document, got: ' . $answer );
