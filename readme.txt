@@ -57,9 +57,10 @@ normalising it yourself.
 Vector storage is out of scope for this plugin — it returns the vectors and
 never touches a database.
 
-Embeddings need version 1.4.0 or newer of the WordPress AI client, which
-neither WordPress 7.0 nor 7.1 bundles. On an older version the embedding model is not
-offered, and every other model keeps working.
+Embeddings need version 1.4.0 or newer of the WordPress AI client. WordPress
+7.0 and 7.1 bundle an older version, but the [AI Experiments](https://wordpress.org/plugins/ai/)
+plugin adds embedding support to it from version 1.3.0 on. Without either, the
+embedding model is not offered, and every other model keeps working.
 
 = Text to Speech =
 
