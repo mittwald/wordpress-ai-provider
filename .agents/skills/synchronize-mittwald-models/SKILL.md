@@ -141,26 +141,34 @@ model claiming several capabilities gets the first class in that chain — not t
 best fit. Check the ordering when adding a capability to an existing model.
 
 Capabilities the provider does not route yet throw a `RuntimeException` at model
-construction rather than degrading. Embedding generation is currently in that
-state deliberately; if an audit adds a capability with no class behind it, the
-result is a hard failure for anyone who selects that model.
+construction rather than degrading. If an audit adds a capability with no class
+behind it, the result is a hard failure for anyone who selects that model.
 
 ### The SDK version constrains what can be declared
 
-Interfaces resolve when the class is declared, so implementing one that a
-permitted `wordpress/php-ai-client` version lacks makes the whole plugin fatal
-on load — not a degraded operation, a dead plugin. Before implementing a new
-model interface, confirm it exists in the lowest version `composer.json` allows,
-and raise the constraint if it does not:
+The plugin does not bundle `wordpress/php-ai-client`. At runtime it uses the
+version WordPress core ships, and `composer.json` only pins the SDK under
+`require-dev`, so raising that constraint changes nothing for a real site.
+WordPress 7.0 bundles 1.3.x; that is the oldest SDK the plugin must run on.
+
+Anything newer than that needs a runtime check before it is touched. An enum
+value the SDK lacks (`OptionEnum::dimensions()` on 1.3) throws, and building it
+in `MittwaldModelMetadataDirectory` takes every model down with it. A model class
+implementing an interface the SDK lacks is fatal the moment it is autoloaded.
+`MittwaldModelMetadataDirectory::supportsEmbeddingGeneration()` is the pattern:
+it checks for the interface and the option key without loading the model class,
+and the metadata switch gives the model no capabilities when the check fails, so
+nothing ever routes to the class.
+
+Check what the oldest SDK offers against core's copy:
 
 ```bash
-grep -n "php-ai-client\|wp-ai-client" composer.json
-ls vendor/wordpress/php-ai-client/src/Providers/Models/
+gh api "repos/WordPress/wordpress-develop/contents/src/wp-includes/php-ai-client/src/AiClient.php?ref=7.0" --jq .content | base64 -d | grep VERSION
 ```
 
-`composer run analyse` catches this: PHPStan resolves the interface against the
-installed SDK and reports one that does not exist. Running either test suite
-proves it too, since both load every class in `includes/`.
+`composer run analyse` and the default test run only see the SDK in
+`composer.lock`, so they cannot catch this. The `unit-oldest-sdk` CI job runs the
+unit suite against 1.3; `tests/README.md` shows how to do the same locally.
 
 Type hints and `use` statements behave differently: they resolve lazily, at call
 time. Referencing a class from a newer version inside a method body is safe on

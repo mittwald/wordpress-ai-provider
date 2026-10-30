@@ -21,10 +21,11 @@ composer run test:integration  # real API calls, needs MITTWALD_AI_API_KEY
 | `fixtures/`         | Images the vision and OCR tests send to the API.                     |
 
 `tests/includes/ModelCatalogue.php` holds the documented mittwald model lineup —
-`CURRENT`, `RETIRED` and `UNIMPLEMENTED`. It is maintained by hand from the
-upstream model table and is the single place to edit when models change; the
-`add-model` and `synchronize-mittwald-models` skills point at it, and
-`ModelCatalogueTest` audits the plugin against it.
+`CURRENT`, `RETIRED` and `UNIMPLEMENTED`, plus `EMBEDDING` for the embedding
+models, which count as known gaps on an SDK too old to offer them. It is
+maintained by hand from the upstream model table and is the single place to
+edit when models change; the `add-model` and `synchronize-mittwald-models`
+skills point at it, and `ModelCatalogueTest` audits the plugin against it.
 
 ## Unit suite
 
@@ -53,6 +54,21 @@ installs on every supported version, which means the locked PHPUnit is 9.6 and
 reads the annotation. The attribute keeps the suite working on PHPUnit 10 and
 newer, where annotations are deprecated. On PHP 7.4 the attribute is parsed as a
 comment, so carrying both is harmless.
+
+The plugin does not bundle `wordpress/php-ai-client`; at runtime it uses the
+version WordPress core ships, and `composer.json` only pins the one used in
+development. WordPress 7.0 ships 1.3.x, which predates embedding generation, so
+CI also runs the unit suite with that SDK swapped in:
+
+```bash
+composer require --dev --with-all-dependencies "wordpress/php-ai-client:~1.3.0"
+composer run test:unit
+```
+
+Tests that need a newer SDK skip themselves there via
+`TestCase::skip_without_embedding_support()`, and
+`test_embedding_model_claims_nothing_on_an_older_sdk()` runs only there. Revert
+`composer.json` and `composer.lock` afterwards.
 
 PHPStan analyses `includes/` and the plugin bootstrap, not `tests/`. Analysing
 test code needs `phpstan/phpstan-phpunit`, which requires a newer PHPStan than
@@ -84,8 +100,13 @@ Coverage by model kind:
 | `VisionTest`                | Image input on the vision-capable chat models.                       |
 | `OcrTest`                   | `GLM-OCR`, including its deliberately reduced option set.            |
 | `TextToSpeechTest`          | `audio/speech`: every advertised voice and container format.         |
+| `EmbeddingGenerationTest`   | `embeddings`: default width, every documented narrower width and its normalisation, batching and input order. |
 | `ImageGenerationTest`       | Image generation — skips while no image model is on offer.           |
 | `PromptBuilderTest`         | The same capabilities driven through `AiClient::prompt()`, the entry point a site uses. |
+
+`EmbeddingGenerationTest` covers its own builder path — embeddings go through
+`AiClient::input()` rather than `AiClient::prompt()`, so `PromptBuilderTest` has
+nothing to say about them.
 
 Two checks watch for the catalogue drifting, and they are deliberately not
 equally loud:

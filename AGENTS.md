@@ -17,7 +17,10 @@ composer run test             # Run the unit test suite (offline)
 composer run test:integration # Run integration tests against the real API
 ```
 
-CI runs `composer run analyse` and `composer run test` across PHP 7.4–8.5.
+CI runs `composer run analyse` and `composer run test` across PHP 7.4–8.5, and
+the unit suite once more against `wordpress/php-ai-client` 1.3, the version
+WordPress 7.0 bundles. The plugin does not ship the SDK, so any API newer than
+1.3 needs a runtime check (see `MittwaldModelMetadataDirectory::supportsEmbeddingGeneration()`).
 
 Tests live in `tests/`; see `tests/README.md` for the layout. The unit suite runs
 offline against a fake HTTP transport and a small set of WordPress function

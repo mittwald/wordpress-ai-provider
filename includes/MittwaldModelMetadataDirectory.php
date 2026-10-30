@@ -11,8 +11,10 @@ use WordPress\AiClient\Providers\Http\DTO\Request;
 use WordPress\AiClient\Providers\Http\DTO\Response;
 use WordPress\AiClient\Providers\Http\Enums\HttpMethodEnum;
 use WordPress\AiClient\Providers\Http\Exception\ResponseException;
+use WordPress\AiClient\Providers\Models\DTO\ModelConfig;
 use WordPress\AiClient\Providers\Models\DTO\ModelMetadata;
 use WordPress\AiClient\Providers\Models\DTO\SupportedOption;
+use WordPress\AiClient\Providers\Models\EmbeddingGeneration\Contracts\EmbeddingGenerationModelInterface;
 use WordPress\AiClient\Providers\Models\Enums\CapabilityEnum;
 use WordPress\AiClient\Providers\Models\Enums\OptionEnum;
 use WordPress\AiClient\Providers\OpenAiCompatibleImplementation\AbstractOpenAiCompatibleModelMetadataDirectory;
@@ -118,6 +120,38 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 			new SupportedOption( OptionEnum::customOptions() ),
 		);
 
+		$embeddingCapabilities = array();
+		$embeddingOptions      = array();
+		if ( self::supportsEmbeddingGeneration() ) {
+			$embeddingCapabilities = array(
+				CapabilityEnum::embeddingGeneration(),
+			);
+
+			/*
+			 * `Qwen3-Embedding-8B` projects to a narrower vector on request, and accepts only the widths
+			 * listed below; the documentation gives 256 as the floor, because retrieval quality degrades
+			 * beneath it. Declaring the values, and not just the option, is what makes a request for an
+			 * unlisted width report "no suitable model" instead of reaching the API and failing there.
+			 *
+			 * The endpoint L2-normalises the vector after reducing it, so callers need no follow-up
+			 * normalisation of their own.
+			 *
+			 * This is the per-model switch for the parameter, which is where the supported-endpoints page
+			 * puts it too: support is a property of each model instead of the endpoint as a whole.
+			 * `MittwaldEmbeddingGenerationModel` reads the option back off the metadata, so an embedding
+			 * model added here without it rejects a configured width instead of quietly returning a
+			 * full-width vector.
+			 */
+			$embeddingOptions = array(
+				new SupportedOption( OptionEnum::inputModalities(), array( array( ModalityEnum::text() ) ) ),
+				new SupportedOption(
+					OptionEnum::dimensions(),
+					array( 256, 512, 768, 1024, 1536, 2048, 3072, 4096 )
+				),
+				new SupportedOption( OptionEnum::customOptions() ),
+			);
+		}
+
 		$modelsData = (array) $responseData['data'];
 
 		$models = array_values(
@@ -129,7 +163,9 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 					$gptOcrCapabilities,
 					$gptOcrOptions,
 					$ttsCapabilities,
-					$ttsOptions
+					$ttsOptions,
+					$embeddingCapabilities,
+					$embeddingOptions
 				): ModelMetadata {
 					$modelId = $modelData['id'];
 					switch ( $modelId ) {
@@ -152,6 +188,10 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 						case 'Qwen3-TTS-12Hz-1.7B-CustomVoice':
 							$modelCaps    = $ttsCapabilities;
 							$modelOptions = $ttsOptions;
+							break;
+						case 'Qwen3-Embedding-8B':
+							$modelCaps    = $embeddingCapabilities;
+							$modelOptions = $embeddingOptions;
 							break;
 						case 'Qwen3-VL-Reranker-2B':
 							$modelCaps    = array();
@@ -176,6 +216,28 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 		usort( $models, array( $this, 'modelSortCallback' ) );
 
 		return $models;
+	}
+
+	/**
+	 * Whether the AI client SDK at runtime is recent enough for embedding generation.
+	 *
+	 * The plugin does not bundle the SDK; it runs against whichever version WordPress core ships.
+	 * Embedding generation and the `dimensions` option arrived in php-ai-client 1.4.0, while
+	 * WordPress 7.0 bundles 1.3.x. On such an SDK, `OptionEnum::dimensions()` throws and
+	 * `MittwaldEmbeddingGenerationModel` cannot even be loaded, because the interface it
+	 * implements is missing. Embedding models are then listed without capabilities, as they
+	 * were before the plugin implemented the operation, so they never resolve to that class.
+	 *
+	 * The checks must not touch `MittwaldEmbeddingGenerationModel` itself, since autoloading it is
+	 * what fails on an older SDK.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @return bool True if embedding generation can be offered.
+	 */
+	public static function supportsEmbeddingGeneration(): bool {
+		return interface_exists( EmbeddingGenerationModelInterface::class )
+			&& defined( ModelConfig::class . '::KEY_DIMENSIONS' );
 	}
 
 	/**

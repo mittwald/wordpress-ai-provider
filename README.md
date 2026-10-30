@@ -83,9 +83,32 @@ Fully supported for conversational AI, content generation, and chat-based intera
 - Tool/function calling
 - Streaming responses
 
-### Embeddings ⏸️
+### Embeddings ✅
 
-Not currently implemented.
+**Available Models:**
+- **Qwen Embedding**: `Qwen3-Embedding-8B`
+
+**Capabilities:**
+- Text to vector, one embedding per input
+- 4096-dimensional vectors by default, up to 32,768 tokens of context per input
+- A narrower vector on request, via the `dimensions` option
+- Several inputs per request; embeddings are returned in input order
+
+The `dimensions` option accepts 256, 512, 768, 1024, 1536, 2048, 3072 and 4096;
+256 is the documented floor, as retrieval quality degrades below it. Any other
+width is refused before a request is sent: automatic model selection finds no
+suitable model, and an explicitly chosen model rejects the width and lists the
+accepted ones. Pass the width through the `dimensions` option itself; as a
+custom option it is refused. The endpoint L2-normalises a
+projected vector, so you can use it directly for dot-product similarity without
+normalising it yourself.
+
+Vector storage is out of scope for this plugin — it returns the vectors and
+never touches a database.
+
+Embeddings need version 1.4.0 or newer of the WordPress AI client, which
+WordPress 7.0 does not bundle. On an older version the embedding model is not
+offered, and every other model keeps working.
 
 ### Text to Image ⏸️
 
