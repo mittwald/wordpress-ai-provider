@@ -62,7 +62,7 @@ final class ModelCatalogueTest extends TestCase {
 				continue;
 			}
 
-			if ( in_array( $model_id, ModelCatalogue::UNIMPLEMENTED, true ) ) {
+			if ( in_array( $model_id, ModelCatalogue::unimplemented(), true ) ) {
 				continue;
 			}
 
@@ -88,7 +88,7 @@ final class ModelCatalogueTest extends TestCase {
 	public function test_known_gaps_still_claim_nothing(): void {
 		$now_implemented = array();
 
-		foreach ( $this->resolve_model_metadata( ModelCatalogue::UNIMPLEMENTED ) as $model_id => $metadata ) {
+		foreach ( $this->resolve_model_metadata( ModelCatalogue::unimplemented() ) as $model_id => $metadata ) {
 			if ( array() !== $metadata->getSupportedCapabilities() ) {
 				$now_implemented[] = $model_id;
 			}
@@ -176,13 +176,25 @@ final class ModelCatalogueTest extends TestCase {
 			array_values( array_diff( ModelCatalogue::UNIMPLEMENTED, ModelCatalogue::CURRENT ) ),
 			'Every known gap must be a currently offered model.'
 		);
+
+		$this->assertSame(
+			array(),
+			array_values( array_diff( ModelCatalogue::EMBEDDING, ModelCatalogue::CURRENT ) ),
+			'Every embedding model must be a currently offered model.'
+		);
+
+		$this->assertSame(
+			array(),
+			array_values( array_intersect( ModelCatalogue::EMBEDDING, ModelCatalogue::UNIMPLEMENTED ) ),
+			'An embedding model is implemented; it cannot also be a known gap.'
+		);
 	}
 
 	/**
 	 * The catalogue lists are free of duplicates.
 	 */
 	public function test_catalogue_lists_have_no_duplicates(): void {
-		foreach ( array( 'CURRENT', 'RETIRED', 'UNIMPLEMENTED' ) as $list ) {
+		foreach ( array( 'CURRENT', 'RETIRED', 'UNIMPLEMENTED', 'EMBEDDING' ) as $list ) {
 			/** @var list<string> $values */
 			$values = constant( ModelCatalogue::class . '::' . $list );
 

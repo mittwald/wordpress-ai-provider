@@ -332,6 +332,8 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 * The embedding model turns text into vectors and offers nothing else.
 	 */
 	public function test_embedding_model_is_text_to_vector(): void {
+		$this->skip_without_embedding_support();
+
 		$metadata = $this->model_metadata( 'Qwen3-Embedding-8B' );
 
 		$this->assertHasCapabilities( $metadata, array( CapabilityEnum::embeddingGeneration() ) );
@@ -347,13 +349,36 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	}
 
 	/**
+	 * On an SDK without embedding generation, every model still lists.
+	 *
+	 * WordPress 7.0 bundles php-ai-client 1.3.x, which has neither the
+	 * embedding interface nor the `dimensions` option. Building the embedding
+	 * options there would throw and take the whole directory down with it, so
+	 * the embedding model falls back to claiming nothing while the rest of the
+	 * lineup stays intact. Runs only on such an SDK.
+	 */
+	public function test_embedding_model_claims_nothing_on_an_older_sdk(): void {
+		if ( MittwaldModelMetadataDirectory::supportsEmbeddingGeneration() ) {
+			$this->markTestSkipped( 'The installed php-ai-client supports embedding generation.' );
+		}
+
+		$resolved = $this->resolve_model_metadata( array( 'gpt-oss-120b', 'Qwen3-Embedding-8B' ) );
+
+		$this->assertSame( array(), $resolved['Qwen3-Embedding-8B']->getSupportedCapabilities() );
+		$this->assertSame( array(), $resolved['Qwen3-Embedding-8B']->getSupportedOptions() );
+		$this->assertNotSame( array(), $resolved['gpt-oss-120b']->getSupportedCapabilities() );
+	}
+
+	/**
 	 * The embedding model exposes only the options it actually accepts.
 	 *
-	 * `dimensions` is included on the strength of the endpoint's behaviour: it
-	 * answers a request carrying the parameter with a vector of the requested
-	 * width, which the AI hosting documentation currently denies.
+	 * `dimensions` is included because the model documentation lists it: the
+	 * endpoint answers a request carrying the parameter with a vector of the
+	 * requested width.
 	 */
 	public function test_embedding_model_exposes_a_reduced_option_set(): void {
+		$this->skip_without_embedding_support();
+
 		$metadata = $this->model_metadata( 'Qwen3-Embedding-8B' );
 
 		$this->assertSame(
@@ -373,6 +398,8 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 * `EmbeddingBuilder` uses, so this is the path a site actually takes.
 	 */
 	public function test_an_embedding_request_resolves_to_the_embedding_model(): void {
+		$this->skip_without_embedding_support();
+
 		$requirements = ModelRequirements::fromEmbeddingData(
 			array( new MessagePart( 'An important document' ) ),
 			new ModelConfig()
@@ -388,6 +415,8 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 * The embedding model advertises exactly the widths its documentation lists.
 	 */
 	public function test_embedding_model_advertises_the_documented_widths(): void {
+		$this->skip_without_embedding_support();
+
 		$metadata = $this->model_metadata( 'Qwen3-Embedding-8B' );
 
 		$this->assertSame(
@@ -405,6 +434,8 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 */
 	#[DataProvider( 'provide_documented_dimensions' )]
 	public function test_an_embedding_request_with_a_documented_width_resolves_to_the_model( int $width ): void {
+		$this->skip_without_embedding_support();
+
 		$this->assertSame(
 			array( 'Qwen3-Embedding-8B' ),
 			$this->models_matching( $this->embedding_requirements( $width ) )
@@ -424,6 +455,8 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 */
 	#[DataProvider( 'provide_undocumented_dimensions' )]
 	public function test_an_embedding_request_with_an_undocumented_width_resolves_to_nothing( int $width ): void {
+		$this->skip_without_embedding_support();
+
 		$this->assertSame( array(), $this->models_matching( $this->embedding_requirements( $width ) ) );
 	}
 
@@ -627,7 +660,7 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 			),
 			'embedding' => array(
 				new ModelRequirements( array( CapabilityEnum::embeddingGeneration() ), array() ),
-				array( 'Qwen3-Embedding-8B' ),
+				MittwaldModelMetadataDirectory::supportsEmbeddingGeneration() ? array( 'Qwen3-Embedding-8B' ) : array(),
 			),
 		);
 	}

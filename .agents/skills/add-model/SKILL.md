@@ -34,7 +34,7 @@ indistinguishable from a correct one until someone tries to use it.
 If the model implies an operation this plugin does not implement yet (a new
 endpoint rather than a new model), that is `synchronize-mittwald-models`
 territory — it covers endpoint probing, the operation interfaces in the SDK, and
-the SDK version constraint that implementing one imposes. Say so rather than
+the runtime SDK check that implementing one requires. Say so rather than
 half-implementing it here.
 
 ## Step 2: Decide what it should claim

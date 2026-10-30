@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Mittwald\AiProvider\Tests\Includes;
 
+use Mittwald\AiProvider\MittwaldModelMetadataDirectory;
+
 /**
  * The model lineup the tests are written against.
  *
@@ -75,11 +77,37 @@ final class ModelCatalogue {
 	);
 
 	/**
+	 * Currently offered embedding models.
+	 *
+	 * Embedding generation needs php-ai-client 1.4.0, which WordPress 7.0 does
+	 * not bundle. On an older SDK the plugin lists these without capabilities,
+	 * so {@see self::unimplemented()} counts them as known gaps there.
+	 *
+	 * @var list<string>
+	 */
+	public const EMBEDDING = array(
+		'Qwen3-Embedding-8B',
+	);
+
+	/**
+	 * Currently offered models the plugin exposes no capability for on the SDK at hand.
+	 *
+	 * @return list<string>
+	 */
+	public static function unimplemented(): array {
+		if ( MittwaldModelMetadataDirectory::supportsEmbeddingGeneration() ) {
+			return self::UNIMPLEMENTED;
+		}
+
+		return array_values( array_merge( self::UNIMPLEMENTED, self::EMBEDDING ) );
+	}
+
+	/**
 	 * Currently offered models that should resolve to a model class.
 	 *
 	 * @return list<string>
 	 */
 	public static function routable(): array {
-		return array_values( array_diff( self::CURRENT, self::UNIMPLEMENTED ) );
+		return array_values( array_diff( self::CURRENT, self::unimplemented() ) );
 	}
 }

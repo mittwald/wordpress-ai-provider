@@ -32,6 +32,36 @@ jobs:
       - name: Run unit tests
         run: composer run test:unit
 
+  unit-oldest-sdk:
+    name: Unit tests (php-ai-client ${{ matrix.sdk }}, PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    # The plugin does not bundle the AI client SDK; at runtime it uses whichever
+    # version WordPress core ships, and WordPress 7.0 ships 1.3.x. composer.json
+    # only pins the SDK for development, so this job swaps in the oldest SDK the
+    # plugin must still run on, to catch newer SDK APIs used without a gate.
+    strategy:
+      fail-fast: false
+      matrix:
+        sdk: [ '1.3' ]
+        php: [ '7.4', '8.5' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer
+          coverage: none
+
+      - name: Install dependencies with php-ai-client ${{ matrix.sdk }}
+        run: composer require --dev --no-interaction --no-progress --prefer-dist --with-all-dependencies "wordpress/php-ai-client:~${{ matrix.sdk }}.0"
+
+      - name: Run unit tests
+        run: composer run test:unit
+
   integration:
     name: Integration tests
     runs-on: ubuntu-latest

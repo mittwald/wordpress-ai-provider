@@ -103,6 +103,10 @@ normalising it yourself.
 Vector storage is out of scope for this plugin — it returns the vectors and
 never touches a database.
 
+Embeddings need version 1.4.0 or newer of the WordPress AI client, which
+WordPress 7.0 does not bundle. On an older version the embedding model is not
+offered, and every other model keeps working.
+
 ### Text to Image ⏸️
 
 Not currently supported by mittwald AI Hosting.

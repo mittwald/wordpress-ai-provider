@@ -40,6 +40,18 @@ abstract class TestCase extends PhpUnitTestCase {
 	}
 
 	/**
+	 * Skips the test on an AI client SDK too old for embedding generation.
+	 *
+	 * Such an SDK lacks the interfaces and options the test would touch; the
+	 * plugin's behaviour there is covered by tests that run only on it.
+	 */
+	protected function skip_without_embedding_support(): void {
+		if ( ! MittwaldModelMetadataDirectory::supportsEmbeddingGeneration() ) {
+			$this->markTestSkipped( 'The installed php-ai-client predates embedding generation (1.4.0).' );
+		}
+	}
+
+	/**
 	 * Returns the provider metadata, built by the plugin's own factory.
 	 */
 	protected function provider_metadata(): ProviderMetadata {

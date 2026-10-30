@@ -56,6 +56,7 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		$this->skip_without_embedding_support();
 		$this->transporter = new FakeHttpTransporter();
 	}
 
