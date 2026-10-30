@@ -368,11 +368,11 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 	/**
 	 * A configured width is rejected by a model that does not advertise it.
 	 *
-	 * The SDK's own model resolution matches on the same supported options, so
-	 * this is unreachable through `EmbeddingBuilder`. It is reached through the
-	 * named-model API — `ProviderRegistry::getProviderModel()` performs no
-	 * requirements matching — where returning a full-width vector would
-	 * misreport what was asked for.
+	 * The SDK's automatic model selection matches on the same supported options,
+	 * so it never picks such a model for a request with a width. A model chosen
+	 * explicitly — `EmbeddingBuilder::usingModel()`, or a direct call on a model
+	 * from `ProviderRegistry::getProviderModel()` — skips that matching, and
+	 * returning a full-width vector there would misreport what was asked for.
 	 */
 	public function test_a_configured_dimension_is_rejected_when_unsupported(): void {
 		$metadata = new ModelMetadata(
@@ -480,8 +480,9 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 	 * A width the model does not offer is rejected before a request is made.
 	 *
 	 * The documented set is discrete, with 256 as the floor because retrieval
-	 * quality degrades beneath it. Model resolution filters on the same values,
-	 * so this is reached through the named-model API, which does no matching.
+	 * quality degrades beneath it. Automatic model selection filters on the same
+	 * values, so this is reached when the model is chosen explicitly, which skips
+	 * that matching.
 	 *
 	 * @param int $width A width outside the documented set.
 	 *
@@ -558,6 +559,47 @@ final class MittwaldEmbeddingGenerationModelTest extends TestCase {
 			array( 'model' ),
 			array( 'input' ),
 			array( 'encoding_format' ),
+			array( 'dimensions' ),
+		);
+	}
+
+	/**
+	 * A width passed as a custom option is refused, even with no width configured.
+	 *
+	 * Without a configured width, `dimensions` is not among the parameters the
+	 * model sets, so a plain conflict check would let it through to the API
+	 * without the supported-width check. Nothing is sent.
+	 *
+	 * @param mixed $width A value a caller might pass as the custom option.
+	 *
+	 * @dataProvider provide_custom_dimension_values
+	 */
+	#[DataProvider( 'provide_custom_dimension_values' )]
+	public function test_a_custom_dimensions_option_is_refused( $width ): void {
+		$config = new ModelConfig();
+		$config->setCustomOptions( array( 'dimensions' => $width ) );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'ModelConfig::setDimensions()' );
+
+		try {
+			$this->model( $config )->generateEmbeddingResult( $this->inputs( 'An important document' ) );
+		} finally {
+			$this->assertSame( 0, $this->transporter->request_count() );
+		}
+	}
+
+	/**
+	 * Custom option values for `dimensions`: an unlisted width, a listed one,
+	 * and one of the wrong type.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public static function provide_custom_dimension_values(): array {
+		return array(
+			'unlisted width' => array( 100 ),
+			'listed width'   => array( 256 ),
+			'wrong type'     => array( 'banana' ),
 		);
 	}
 

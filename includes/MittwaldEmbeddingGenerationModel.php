@@ -101,10 +101,11 @@ class MittwaldEmbeddingGenerationModel extends AbstractApiBasedModel implements
 		 * `MittwaldModelMetadataDirectory` declares the option and the requested width forwards it;
 		 * anything else is refused here.
 		 *
-		 * Model resolution matches on the same supported options, so this is unreachable through
-		 * `EmbeddingBuilder`. It is reached through the named-model API, which performs no
-		 * requirements matching, and where a vector of the wrong width would misreport what the
-		 * caller asked for.
+		 * Automatic model selection matches on the same supported options, so a request that leaves
+		 * the choice to the SDK never gets here with an unsupported width. A model chosen explicitly
+		 * does: `EmbeddingBuilder::usingModel()` and a direct call on a model from
+		 * `ProviderRegistry::getProviderModel()` both skip requirements matching, and a vector of the
+		 * wrong width would misreport what the caller asked for.
 		 */
 		$dimensions = $config->getDimensions();
 		if ( null !== $dimensions ) {
@@ -141,6 +142,17 @@ class MittwaldEmbeddingGenerationModel extends AbstractApiBasedModel implements
 		 */
 		$customOptions = $config->getCustomOptions();
 		foreach ( $customOptions as $key => $value ) {
+			/*
+			 * `dimensions` is reserved even when no width is configured: passed as a custom option, it
+			 * would reach the API without the supported-width check above.
+			 */
+			if ( 'dimensions' === $key ) {
+				throw new InvalidArgumentException(
+					'The custom option "dimensions" is not allowed. Set the vector width through '
+					. 'ModelConfig::setDimensions(), which is checked against the widths the model supports.'
+				);
+			}
+
 			if ( isset( $params[ $key ] ) ) {
 				throw new InvalidArgumentException(
 					sprintf(

@@ -46,9 +46,12 @@ Fully supported for conversational AI, content generation, and chat-based intera
 - A narrower vector on request, via the `dimensions` option
 - Several inputs per request; embeddings are returned in input order
 
-The `dimensions` option accepts 256, 512, 768, 1024, 1536, 2048, 3072 and 4096.
-Asking for anything else reports no suitable model, since 256 is the documented
-floor — retrieval quality degrades below it. The endpoint L2-normalises a
+The `dimensions` option accepts 256, 512, 768, 1024, 1536, 2048, 3072 and 4096;
+256 is the documented floor, as retrieval quality degrades below it. Any other
+width is refused before a request is sent: automatic model selection finds no
+suitable model, and an explicitly chosen model rejects the width and lists the
+accepted ones. Pass the width through the `dimensions` option itself; as a
+custom option it is refused. The endpoint L2-normalises a
 projected vector, so you can use it directly for dot-product similarity without
 normalising it yourself.
 

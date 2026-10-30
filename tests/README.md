@@ -100,7 +100,7 @@ Coverage by model kind:
 | `VisionTest`                | Image input on the vision-capable chat models.                       |
 | `OcrTest`                   | `GLM-OCR`, including its deliberately reduced option set.            |
 | `TextToSpeechTest`          | `audio/speech`: every advertised voice and container format.         |
-| `EmbeddingGenerationTest`   | `embeddings`: vector width, batching and input order, and that a narrower vector is not on offer. |
+| `EmbeddingGenerationTest`   | `embeddings`: default width, every documented narrower width and its normalisation, batching and input order. |
 | `ImageGenerationTest`       | Image generation — skips while no image model is on offer.           |
 | `PromptBuilderTest`         | The same capabilities driven through `AiClient::prompt()`, the entry point a site uses. |
 
