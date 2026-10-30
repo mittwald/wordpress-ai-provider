@@ -277,6 +277,29 @@ abstract class IntegrationTestCase extends PhpUnitTestCase {
 	}
 
 	/**
+	 * Marks the test incomplete if a structured answer hit the known whitespace runaway.
+	 *
+	 * Since late October 2026, mittwald AI hosting intermittently stops making
+	 * progress inside a `json_schema`-constrained object and emits whitespace
+	 * until `max_tokens` runs out, so the object is never closed. That is an
+	 * upstream defect (reported to mittwald AI hosting), not one in this plugin,
+	 * so the test reports it instead of failing. Any other malformed answer
+	 * still fails the test's own assertions.
+	 *
+	 * @param string $answer The raw content of the answer.
+	 */
+	protected function mark_incomplete_on_json_whitespace_runaway( string $answer ): void {
+		if ( null !== json_decode( $answer, true ) || 1 !== preg_match( '/^\s*\{[^}]*\s{16,}$/', $answer ) ) {
+			return;
+		}
+
+		$this->markTestIncomplete(
+			'Known upstream issue: the model left the JSON object open and spent the rest of max_tokens on whitespace. '
+			. 'Answer so far: ' . rtrim( $answer )
+		);
+	}
+
+	/**
 	 * Builds a prompt consisting of a single user message.
 	 *
 	 * @param string $text Message text.
