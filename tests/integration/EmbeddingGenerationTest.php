@@ -264,14 +264,22 @@ final class EmbeddingGenerationTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * Starts an embedding builder bound to this provider.
+	 * Starts an embedding builder bound to this provider, skipping if the
+	 * embedding model is not on offer.
 	 *
 	 * Deliberately does not name a model: letting the builder discover one is
-	 * what exercises the metadata this plugin publishes.
+	 * what exercises the metadata this plugin publishes. The availability check
+	 * only decides whether there is anything to discover.
 	 *
 	 * @param string ...$texts The texts to embed.
 	 */
 	private function builder( string ...$texts ): EmbeddingBuilder {
+		if ( ! in_array( self::MODEL_ID, $this->available_model_ids(), true ) ) {
+			$this->markTestSkipped(
+				sprintf( 'mittwald AI hosting does not currently offer the model %s.', self::MODEL_ID )
+			);
+		}
+
 		$request_options = new RequestOptions();
 		$request_options->setTimeout( self::REQUEST_TIMEOUT );
 
