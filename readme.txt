@@ -2,7 +2,7 @@
 Contributors: mittwald, lukasfritzedev, mhelmich
 Tags: AI, llm, gpt, artificial-intelligence, connector
 Requires at least: 7.0
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: trunk
 Requires PHP: 7.4
 License: GPLv2 or later
@@ -23,17 +23,16 @@ This plugin requires WordPress 7.0 or newer.
 Fully supported for conversational AI, content generation, and chat-based interactions.
 
 **Available Models:**
-- **GPT-OSS models**: Open-source GPT-compatible models
-- **Qwen**: Qwen 3.5 122B-FP8, Qwen 3.6 35B-FP8 and Qwen 3.8 27B-NVFP4 (support vision/image input), `Qwen3.5-0.8B`
-- **Ministral**: supports vision/image input
-- **GLM OCR**: `GLM-OCR`
+- **GPT-OSS**: `gpt-oss-120b`
+- **Qwen**: `Qwen3.5-122B-A10B-FP8`, `Qwen3.6-35B-A3B-FP8` and `Qwen3.8-27B-NVFP4` (support vision/image input), `Qwen3.5-0.8B`
+- **Ministral**: `Ministral-3-14B-Instruct-2512` (supports vision/image input)
+- **GLM OCR**: `GLM-OCR`, for extracting text from an image; it takes an image with a text prompt and supports none of the capabilities below
 
 **Capabilities:**
 - Standard text chat
-- Image vision (Ministral and Qwen models)
+- Image vision (Ministral and the larger Qwen models)
 - JSON output formatting
 - Tool/function calling
-- Streaming responses
 
 = Embeddings =
 
@@ -58,9 +57,10 @@ normalising it yourself.
 Vector storage is out of scope for this plugin — it returns the vectors and
 never touches a database.
 
-Embeddings need version 1.4.0 or newer of the WordPress AI client, which
-WordPress 7.0 does not bundle. On an older version the embedding model is not
-offered, and every other model keeps working.
+Embeddings need version 1.4.0 or newer of the WordPress AI client. WordPress
+7.0 and 7.1 bundle an older version, but the [AI Experiments](https://wordpress.org/plugins/ai/)
+plugin adds embedding support to it from version 1.3.0 on. Without either, the
+embedding model is not offered, and every other model keeps working.
 
 = Text to Speech =
 
