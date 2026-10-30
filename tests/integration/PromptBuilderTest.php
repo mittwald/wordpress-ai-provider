@@ -193,7 +193,7 @@ final class PromptBuilderTest extends IntegrationTestCase {
 
 		$decoded = json_decode( $answer, true );
 
-		$this->assertIsArray( $decoded );
+		$this->assertIsArray( $decoded, 'Expected a JSON document, got: ' . $answer );
 		$this->assertArrayHasKey( 'city', $decoded );
 		$this->assertArrayHasKey( 'population', $decoded );
 	}

@@ -220,9 +220,10 @@ final class TextGenerationTest extends IntegrationTestCase {
 			$this->user_prompt( 'Give me the capital of Germany and roughly how many people live there.' )
 		);
 
-		$decoded = json_decode( $this->text_of( $result ), true );
+		$answer  = $this->text_of( $result );
+		$decoded = json_decode( $answer, true );
 
-		$this->assertIsArray( $decoded );
+		$this->assertIsArray( $decoded, 'Expected a JSON document, got: ' . $answer );
 		$this->assertArrayHasKey( 'city', $decoded );
 		$this->assertArrayHasKey( 'population', $decoded );
 		$this->assertIsString( $decoded['city'] );
