@@ -134,6 +134,7 @@ final class ModelSortOrderTest extends TestCase {
 				'Qwen3.5-122B-A10B-FP8',
 				'Qwen3.6-35B-A3B-FP8',
 				'Qwen3.8-27B-NVFP4',
+				'cohere-transcribe-03-2026',
 				'whisper-large-v3-turbo',
 			),
 			$sorted
