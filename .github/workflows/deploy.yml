@@ -49,7 +49,7 @@ jobs:
           composer run package ${{ steps.get_version.outputs.version }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           files: mittwald-ai-provider.${{ steps.get_version.outputs.version }}.zip
           generate_release_notes: true
