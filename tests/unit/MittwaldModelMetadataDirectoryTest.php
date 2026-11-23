@@ -167,6 +167,7 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	public static function provide_text_only_chat_models(): array {
 		return array(
 			array( 'gpt-oss-120b' ),
+			array( 'Kolibri-1' ),
 			array( 'Qwen3.5-0.8B' ),
 		);
 	}
@@ -199,6 +200,7 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	 */
 	public static function provide_multimodal_chat_models(): array {
 		return array(
+			array( 'DeepSeek-V4.1-Flash-1017' ),
 			array( 'Ministral-3-14B-Instruct-2512' ),
 			array( 'Qwen3.5-122B-A10B-FP8' ),
 			array( 'Qwen3.6-35B-A3B-FP8' ),
@@ -591,7 +593,9 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 	public static function provide_capability_profiles(): array {
 		$chat_models = array(
 			'gpt-oss-120b',
+			'Kolibri-1',
 			'Qwen3.5-0.8B',
+			'DeepSeek-V4.1-Flash-1017',
 			'Ministral-3-14B-Instruct-2512',
 			'Qwen3.5-122B-A10B-FP8',
 			'Qwen3.6-35B-A3B-FP8',
@@ -599,6 +603,7 @@ final class MittwaldModelMetadataDirectoryTest extends TestCase {
 		);
 
 		$vision_models = array(
+			'DeepSeek-V4.1-Flash-1017',
 			'Ministral-3-14B-Instruct-2512',
 			'Qwen3.5-122B-A10B-FP8',
 			'Qwen3.6-35B-A3B-FP8',

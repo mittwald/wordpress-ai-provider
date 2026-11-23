@@ -20,7 +20,7 @@ use Mittwald\AiProvider\MittwaldModelMetadataDirectory;
  *
  * https://developer.mittwald.de/docs/v2/platform/aihosting/models/
  *
- * Last synchronised: 2026-10-26. Re-fetch the table before trusting a run.
+ * Last synchronised: 2026-11-23. Re-fetch the table before trusting a run.
  *
  * @see \Mittwald\AiProvider\Tests\Unit\ModelCatalogueTest
  */
@@ -38,6 +38,8 @@ final class ModelCatalogue {
 		'Qwen3.5-122B-A10B-FP8',
 		'Qwen3.6-35B-A3B-FP8',
 		'Qwen3.8-27B-NVFP4',
+		'Kolibri-1',
+		'DeepSeek-V4.1-Flash-1017',
 		'GLM-OCR',
 		'Qwen3-Embedding-8B',
 		'Qwen3-VL-Reranker-2B',

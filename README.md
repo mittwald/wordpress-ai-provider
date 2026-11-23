@@ -74,11 +74,13 @@ Fully supported for conversational AI, content generation, and chat-based intera
 - **GPT-OSS**: `gpt-oss-120b`
 - **Qwen**: `Qwen3.5-122B-A10B-FP8`, `Qwen3.6-35B-A3B-FP8` and `Qwen3.8-27B-NVFP4` (support vision/image input), `Qwen3.5-0.8B`
 - **Ministral**: `Ministral-3-14B-Instruct-2512` (supports vision/image input)
+- **DeepSeek**: `DeepSeek-V4.1-Flash-1017` (supports vision/image input, in Testphase)
+- **Kolibri**: `Kolibri-1` (German and English, in Testphase)
 - **GLM OCR**: `GLM-OCR`, for extracting text from an image; it takes an image with a text prompt and supports none of the capabilities below
 
 **Capabilities:**
 - Standard text chat
-- Image vision (Ministral and the larger Qwen models)
+- Image vision (Ministral, the larger Qwen models, and DeepSeek-V4.1-Flash-1017)
 - JSON output formatting
 - Tool/function calling
 

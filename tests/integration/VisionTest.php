@@ -46,6 +46,7 @@ final class VisionTest extends IntegrationTestCase {
 		'Qwen3.6-35B-A3B-FP8',
 		'Qwen3.8-27B-NVFP4',
 		'Ministral-3-14B-Instruct-2512',
+		'DeepSeek-V4.1-Flash-1017',
 	);
 
 	/**
@@ -111,6 +112,41 @@ final class VisionTest extends IntegrationTestCase {
 			'/red|rot/',
 			$text,
 			'A vision model should notice that the circle is red. Got: ' . $answer
+		);
+	}
+
+	/**
+	 * DeepSeek-V4.1-Flash-1017 reads an image.
+	 *
+	 * Thinking is switched off via the documented `chat_template_kwargs` knob so
+	 * the small budget is not consumed by a reasoning block.
+	 */
+	public function test_deepseek_v4_1_flash_can_read_an_image(): void {
+		$config = new ModelConfig();
+		$config->setMaxTokens( 4096 );
+		$config->setCustomOptions(
+			array(
+				'chat_template_kwargs' => array( 'reasoning_effort' => 'none' ),
+			)
+		);
+
+		$model = $this->model( 'DeepSeek-V4.1-Flash-1017', $config );
+		$this->assertInstanceOf( MittwaldTextGenerationModel::class, $model );
+
+		$result = $model->generateTextResult(
+			$this->image_prompt(
+				'What shape and colour is the object in this image? Answer in a few words.',
+				'red-circle.png'
+			)
+		);
+
+		$answer = $this->text_of( $result );
+		$text   = strtolower( $answer );
+
+		$this->assertMatchesRegularExpression(
+			'/red|rot/',
+			$text,
+			'DeepSeek-V4.1-Flash-1017 should notice that the circle is red. Got: ' . $answer
 		);
 	}
 
