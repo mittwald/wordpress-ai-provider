@@ -102,6 +102,8 @@ final class ModelSortOrderTest extends TestCase {
 			'Qwen3.5-122B-A10B-FP8',
 			'Qwen3.6-35B-A3B-FP8',
 			'Qwen3.8-27B-NVFP4',
+			'Kolibri-1',
+			'DeepSeek-V4.1-Flash-1017',
 			'GLM-OCR',
 			'Qwen3-Embedding-8B',
 			'Qwen3-TTS-12Hz-1.7B-CustomVoice',
@@ -125,7 +127,9 @@ final class ModelSortOrderTest extends TestCase {
 		$this->assertSame(
 			array(
 				'gpt-oss-120b',
+				'DeepSeek-V4.1-Flash-1017',
 				'GLM-OCR',
+				'Kolibri-1',
 				'Ministral-3-14B-Instruct-2512',
 				'Qwen3-Embedding-8B',
 				'Qwen3-TTS-12Hz-1.7B-CustomVoice',

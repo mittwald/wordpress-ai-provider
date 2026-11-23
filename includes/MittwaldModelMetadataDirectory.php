@@ -170,10 +170,12 @@ class MittwaldModelMetadataDirectory extends AbstractOpenAiCompatibleModelMetada
 					$modelId = $modelData['id'];
 					switch ( $modelId ) {
 						case 'gpt-oss-120b':
+						case 'Kolibri-1':
 						case 'Qwen3.5-0.8B':
 							$modelCaps    = $gptCapabilities;
 							$modelOptions = $gptOptions;
 							break;
+						case 'DeepSeek-V4.1-Flash-1017':
 						case 'Ministral-3-14B-Instruct-2512':
 						case 'Qwen3.5-122B-A10B-FP8':
 						case 'Qwen3.6-35B-A3B-FP8':

@@ -69,6 +69,8 @@ final class TextGenerationTest extends IntegrationTestCase {
 		'Qwen3.8-27B-NVFP4',
 		'Ministral-3-14B-Instruct-2512',
 		'Qwen3.5-0.8B',
+		'Kolibri-1',
+		'DeepSeek-V4.1-Flash-1017',
 	);
 
 	/**
@@ -101,6 +103,54 @@ final class TextGenerationTest extends IntegrationTestCase {
 		$this->assertGreaterThan( 0, $result->getTokenUsage()->getCompletionTokens() );
 		$this->assertSame( 'mittwald', $result->getProviderMetadata()->getId() );
 		$this->assertContains( $result->getModelMetadata()->getId(), self::CHAT_MODELS );
+	}
+
+	/**
+	 * Kolibri-1 answers a plain prompt.
+	 *
+	 * Thinking is switched off via the documented `chat_template_kwargs` knob so
+	 * the small budget is not consumed by a reasoning block.
+	 */
+	public function test_kolibri_1_produces_text(): void {
+		$config = new ModelConfig();
+		$config->setMaxTokens( 4096 );
+		$config->setTemperature( 1.0 );
+		$config->setCustomOptions(
+			array(
+				'chat_template_kwargs' => array( 'reasoning_effort' => 'none' ),
+			)
+		);
+
+		$model = $this->model( 'Kolibri-1', $config );
+		$this->assertInstanceOf( MittwaldTextGenerationModel::class, $model );
+
+		$result = $model->generateTextResult(
+			$this->user_prompt( 'Reply with exactly the word: pong' )
+		);
+
+		$this->assertSame( 'Kolibri-1', $result->getModelMetadata()->getId() );
+		$this->assertNotSame( '', trim( $this->text_of( $result ) ) );
+	}
+
+	/**
+	 * DeepSeek-V4.1-Flash-1017 answers a plain prompt.
+	 *
+	 * Thinking is switched off via the documented `chat_template_kwargs` knob so
+	 * the small budget is not consumed by a reasoning block.
+	 */
+	public function test_deepseek_v4_1_flash_produces_text(): void {
+		$config = new ModelConfig();
+		$config->setMaxTokens( 4096 );
+
+		$model = $this->model( 'DeepSeek-V4.1-Flash-1017', $config );
+		$this->assertInstanceOf( MittwaldTextGenerationModel::class, $model );
+
+		$result = $model->generateTextResult(
+			$this->user_prompt( 'Reply with exactly the word: pong' )
+		);
+
+		$this->assertSame( 'DeepSeek-V4.1-Flash-1017', $result->getModelMetadata()->getId() );
+		$this->assertNotSame( '', trim( $this->text_of( $result ) ) );
 	}
 
 	/**
