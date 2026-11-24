@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Mittwald\AiProvider\Tests\Integration;
 
-use Mittwald\AiProvider\MittwaldAIProvider;
 use Mittwald\AiProvider\Tests\Includes\IntegrationTestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use WordPress\AiClient\AiClient;
@@ -161,11 +160,10 @@ final class EmbeddingGenerationTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * The builder discovers the embedding model and generates through it.
+	 * The builder generates through the embedding model.
 	 *
-	 * This is the whole chain a site takes: the metadata directory advertises
-	 * the capability, the registry matches it, `createModel()` routes to the
-	 * model class, and `EmbeddingBuilder` checks that class satisfies
+	 * This is the chain a site takes: `createModel()` routes to the model class,
+	 * and `EmbeddingBuilder` checks that class satisfies
 	 * `EmbeddingGenerationModelInterface` before calling it.
 	 */
 	public function test_embeddings_through_the_builder(): void {
@@ -250,11 +248,11 @@ final class EmbeddingGenerationTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * A request carrying a width still discovers the model.
+	 * A request carrying a width is still supported by the model.
 	 *
-	 * Discovery matches on advertised options, so omitting `dimensions` from
-	 * the metadata would remove the model from the running for this request
-	 * without any error being raised.
+	 * The builder matches the request against the options the model
+	 * advertises, so omitting `dimensions` from the metadata would make it
+	 * report this request as unsupported.
 	 */
 	public function test_a_request_carrying_a_width_is_still_supported(): void {
 		$this->assertTrue(
@@ -264,27 +262,24 @@ final class EmbeddingGenerationTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * Starts an embedding builder bound to this provider, skipping if the
-	 * embedding model is not on offer.
+	 * Starts an embedding builder bound to the embedding model, skipping if it
+	 * is not on offer.
 	 *
-	 * Deliberately does not name a model: letting the builder discover one is
-	 * what exercises the metadata this plugin publishes. The availability check
-	 * only decides whether there is anything to discover.
+	 * The model is named rather than discovered. php-ai-client 1.5.0 removed
+	 * model discovery from `EmbeddingBuilder`, so `usingProvider()` no longer
+	 * exists there; `usingModel()` is the one way to bind a model that works on
+	 * 1.4.0 and 1.5.x alike. Both still match the request's requirements against
+	 * the options the model advertises, which is what the metadata tests below
+	 * rely on.
 	 *
 	 * @param string ...$texts The texts to embed.
 	 */
 	private function builder( string ...$texts ): EmbeddingBuilder {
-		if ( ! in_array( self::MODEL_ID, $this->available_model_ids(), true ) ) {
-			$this->markTestSkipped(
-				sprintf( 'mittwald AI hosting does not currently offer the model %s.', self::MODEL_ID )
-			);
-		}
-
 		$request_options = new RequestOptions();
 		$request_options->setTimeout( self::REQUEST_TIMEOUT );
 
 		return AiClient::input( $texts, $this->registry() )
-			->usingProvider( MittwaldAIProvider::class )
+			->usingModel( $this->embedding_model() )
 			->usingRequestOptions( $request_options );
 	}
 }
